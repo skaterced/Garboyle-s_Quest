@@ -18,6 +18,7 @@
 #define MAX_XSPEED_FAN 54
 #define MAX_YSPEED 3 * (1 << FIXED_POINT)
 #define CAMERA_OFFSET 16
+#define SHOOT_TIMER_INIT 40
 
 extern bool gridGetSolid(int8_t x, int8_t y);
 extern void kidHurt();
@@ -49,13 +50,32 @@ struct Players
     boolean isClimbing;
     byte imuneTimer;
     byte jumpTimer;
+    byte shootingTimer;
     byte frame;
     byte hearts;
     byte wingsJauge;
     //byte balloonOffset;
     vec2 particles[PLAYER_PARTICLES];
     Weapon fireBalls[MAX_WEAPON];
+    void fire(void){
+      for (uint8_t i=0; i<MAX_WEAPON; i++){
+        if ((!fireBalls[i].isActive)&&(0==shootingTimer)){
+          fireBalls[i].isActive=true;
+          fireBalls[i].pos.x=pos.x;
+          fireBalls[i].pos.y=pos.y+3;
+          fireBalls[i].actualpos.x=actualpos.x;
+          //fireBalls[i].actualpos.y=actualpos.y;
+          //fireBalls[i].direction=direction; //need?
+          fireBalls[i].speed.x= (direction? -1:1)*WEAPON_SPEED;
+          //fireBalls[i].speed.y=0;
+          shootingTimer=SHOOT_TIMER_INIT;
+          break;
+        }
+      }
+    }
 };
+
+//Sketch uses 26254 bytes (91%) of program storage space. Maximum is 28672 bytes
 
 Players kid;
 Camera cam;
@@ -72,6 +92,7 @@ void setKid()
   kid.isImune = true;
   kid.imuneTimer = 0;
   kid.jumpTimer = 0;
+  kid.shootingTimer = 0;
   kid.direction = FACING_RIGHT;
   kid.isWalking = false;
   kid.isJumping = false;
@@ -88,11 +109,15 @@ void setKid()
   for (byte i = 0; i < PLAYER_PARTICLES; ++i)
     kid.particles[i] = vec2(random(16), random(16));
   for (byte i = 0; i < MAX_WEAPON; i++)
-    kid.fireBall[i].isActive=false;
+    kid.fireBalls[i].isActive=false;
 }
 
 void checkKid()
 {
+  if (kid.shootingTimer>0) kid.shootingTimer--;
+  for (uint8_t i=0; i<MAX_WEAPON; i++){
+    kid.fireBalls[i].check();
+  }
   if (kid.isImune)
   {
     if (arduboy.everyXFrames(2)) kid.isActive = !kid.isActive;
@@ -310,6 +335,9 @@ void drawKid()
 {
   if (kid.isActive)
   {
+    for (uint8_t i=0; i<MAX_WEAPON; i++){
+      kid.fireBalls[i].draw(cam.pos);
+    }
     vec2 kidcam;
     kidcam.x = kid.pos.x - cam.pos.x;
     kidcam.y = kid.pos.y - cam.pos.y;

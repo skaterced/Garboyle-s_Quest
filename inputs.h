@@ -76,6 +76,7 @@ void checkInputs()
     else //if (!kid.isFlying)
     {
       //kid.isFlying = false;
+      kid.fire();
       kid.isSucking = true;
     }
   }

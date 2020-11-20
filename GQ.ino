@@ -1,4 +1,9 @@
 /*
+  
+  Garboyle's Quest. Made from Mystic Ballon (see under) and inspired by CAPCOM "Gargoyle's Quest"
+
+  
+  
   Mystic Balloon: http://www.team-arg.org/mybl-manual.html
 
   Arduboy version 1.7.2:  http://www.team-arg.org/mybl-downloads.html
