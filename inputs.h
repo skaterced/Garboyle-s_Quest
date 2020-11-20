@@ -75,7 +75,7 @@ void checkInputs()
       gameState = STATE_GAME_PAUSE;
     else //if (!kid.isFlying)
     {
-      kid.isFlying = false;
+      //kid.isFlying = false;
       kid.isSucking = true;
     }
   }

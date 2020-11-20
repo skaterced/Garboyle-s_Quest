@@ -1,12 +1,11 @@
-#ifndef PLAYER_H
-#define PLAYER_H
+#ifndef WEAPON_H
+#define WEAPON_H
 
 #include <Arduino.h>
 #include "globals.h"
 //#include "levels.h"
 #include "vec2.h"
-#include "weapon.h"
-
+/*
 #define FIXED_POINT 5
 #define PLAYER_SPEED_WALKING 1 << FIXED_POINT
 #define PLAYER_SPEED_AIR 2
@@ -18,19 +17,21 @@
 #define MAX_XSPEED_FAN 54
 #define MAX_YSPEED 3 * (1 << FIXED_POINT)
 #define CAMERA_OFFSET 16
+*/
+#define MAX_WEAPON 2
 
 extern bool gridGetSolid(int8_t x, int8_t y);
-extern void kidHurt();
-extern void windNoise();
-
+//extern void kidHurt();
+//extern void windNoise();
+/*
 struct Camera
 {
   // x and y are 9.6 signed fixed vec2 values
   vec2 pos;
   vec2 offset;
-};
+};*/
 
-struct Players
+struct Weapon
 {
   public:
     // x and y are 9.6 signed fixed vec2 values
@@ -38,58 +39,39 @@ struct Players
     vec2 actualpos;
     vec2 speed;
     boolean isActive;
-    boolean isImune;
     boolean direction;
-    boolean isWalking;
-    boolean isJumping;
-    boolean isLanding;
-    boolean isFlying;
-    boolean jumpLetGo;
-    boolean isSucking;
-    boolean isClimbing;
-    byte imuneTimer;
-    byte jumpTimer;
-    byte frame;
-    byte hearts;
-    byte wingsJauge;
+    byte timer; //need?
+    byte type;
+
     //byte balloonOffset;
     vec2 particles[PLAYER_PARTICLES];
-    Weapon fireBalls[MAX_WEAPON];
+
+    void draw(vec2 cam)
+    {
+      if (isActive)
+      {
+        arduboy.drawCircle(pos.x-cam.x,pos.y-cam.y,2);
+        /*vec2 kidcam;
+        kidcam.x = kid.pos.x - cam.pos.x;
+        kidcam.y = kid.pos.y - cam.pos.y;
+        // Fall off earth
+       
+        if (!kid.isSucking)
+        {
+          //sprites.drawSelfMasked(kidcam.x, kidcam.y, kidSprite, 12 + kid.direction);
+          //sprites.drawErase(kidcam.x, kidcam.y, kidSprite, kid.frame + 6 * kid.direction + ((kid.isJumping << 2) + 5 * (kid.isLanding || kid.isFlying)) * !kid.isSucking);
+          sprites.drawOverwrite(kidcam.x, kidcam.y, kidSprite, kid.frame + 7 * kid.direction + ((kid.isJumping << 2) + 5 * (kid.isLanding || kid.isFlying)) * !kid.isSucking + kid.isClimbing*6 );
+        }*/
+    
+      }
+    }
+
+    
 };
 
-Players kid;
-Camera cam;
+//Players kid;
+//Camera cam;
 
-void setKid()
-{
-  kid.pos.x = 0;
-  kid.pos.y = 0;
-  kid.actualpos.x = 128;
-  kid.actualpos.y = 0;
-  kid.speed.x = 0;
-  kid.speed.y = 0;
-  kid.isActive = true;
-  kid.isImune = true;
-  kid.imuneTimer = 0;
-  kid.jumpTimer = 0;
-  kid.direction = FACING_RIGHT;
-  kid.isWalking = false;
-  kid.isJumping = false;
-  kid.isLanding = false;
-  kid.isFlying = false;
-  kid.jumpLetGo = true;
-  kid.isSucking = false;
-  kid.isClimbing = false;
-  kid.wingsJauge = 60;
-  #ifndef HARD_MODE
-  kid.hearts = 3;
-  #endif
-//  kid.balloonOffset = 0;
-  for (byte i = 0; i < PLAYER_PARTICLES; ++i)
-    kid.particles[i] = vec2(random(16), random(16));
-  for (byte i = 0; i < MAX_WEAPON; i++)
-    kid.fireBall[i].isActive=false;
-}
 
 void checkKid()
 {
@@ -258,115 +240,14 @@ void checkKid()
     else
     {
       kid.speed.x = 0;
-      kid.actualpos.x = ((((kid.pos.x + 6) >> 4) << 4) + ((!kid.direction) * 4)) << (FIXED_POINT);      
-      if ( gridGetSolid(tx2, (kid.pos.y + 7) >> 4) || gridGetSolid(tx2, (kid.pos.y + 8) >> 4)){ //shorter region         
-        if (!kid.isWalking){   //stick to the wall
-          kid.isClimbing=true;
-          kid.wingsJauge = 60;
-          kid.isJumping = false;
-          kid.isLanding = false;
-          kid.isFlying = false;
-          kid.jumpLetGo = false;
-          kid.actualpos.y = ((kid.pos.y + 8) >> 4) << (FIXED_POINT + 4);
-          kid.speed.y = 0;
-        }
-      }
+      
+      
     }
   }
 
   kid.pos = (kid.actualpos >> FIXED_POINT);
 
   if (kid.isSucking) windNoise();//sound.tone(300 + random(10), 20);
-}
-
-/*  updateCamera()
- * Positions camera to show kid
- */
-void updateCamera()
-{
-  if (kid.hearts == 0)
-    return;
-  // Camera offset
-  if (cam.offset.x > 0) cam.offset.x--;
-  else if (cam.offset.x < 0) cam.offset.x++;
-  if (cam.offset.y > 0) cam.offset.y--;
-  else if (cam.offset.y < 0) cam.offset.y++;
-
-  vec2 cp;
-  //kp = kid.pos;
-  cp = (cam.pos + cam.offset);
-
-  vec2 V;
-  //vec2 V = (kid.pos - cam.pos + cam.offset) >> 3; // more bytes
-  V.x = kid.pos.x - cp.x - 58;
-  V.y = kid.pos.y - cp.y - 24;
-  V = V >> 2;
-
-  cam.pos += V;
-  cam.pos.y = min(320, cam.pos.y);
-}
-
-void drawKid()
-{
-  if (kid.isActive)
-  {
-    vec2 kidcam;
-    kidcam.x = kid.pos.x - cam.pos.x;
-    kidcam.y = kid.pos.y - cam.pos.y;
-    // Fall off earth
-    if (kidcam.y > 64 + (CAMERA_OFFSET * 3))
-    {
-      kid.actualpos = startPos;
-      kidHurt();
-      if (kid.hearts == 0)
-      {
-        // dead
-        gameState = STATE_GAME_OVER;
-      }
-      //--kid.hearts;
-    }
-    
-    if (kid.isFlying)
-    {
-      int commonx = kidcam.x - (6 * kid.direction);
-      //int commony = kidcam.y + kid.balloonOffset;
-      if (kid.hearts > 1)
-      {
-//        sprites.drawPlusMask(commonx + 1, commony - 11, balloon_plus_mask, 0);
-//        if (kid.hearts > 2) sprites.drawPlusMask(commonx + 7, commony - 12, balloon_plus_mask, 0);
-      }
-//      sprites.drawPlusMask(commonx + 4, commony - 9, balloon_plus_mask, 0);
-    }
-    if (!kid.isSucking)
-    {
-      //sprites.drawSelfMasked(kidcam.x, kidcam.y, kidSprite, 12 + kid.direction);
-      //sprites.drawErase(kidcam.x, kidcam.y, kidSprite, kid.frame + 6 * kid.direction + ((kid.isJumping << 2) + 5 * (kid.isLanding || kid.isFlying)) * !kid.isSucking);
-      sprites.drawOverwrite(kidcam.x, kidcam.y, kidSprite, kid.frame + 7 * kid.direction + ((kid.isJumping << 2) + 5 * (kid.isLanding || kid.isFlying)) * !kid.isSucking + kid.isClimbing*6 );
-    }
-
-    else
-    {
-      sprites.drawPlusMask(kidcam.x - 2, kidcam.y, Firing_plus_mask, walkerFrame + 2*kid.direction); //kidSpriteSuck
-      for (byte i = 0; i < PLAYER_PARTICLES; ++i)
-      {
-        // Update
-        if (kid.particles[i].y > 2) --kid.particles[i].y;
-        else if (kid.particles[i].y < -2) ++kid.particles[i].y;
-        kid.particles[i].x -= 2;
-        if (kid.particles[i].x < 0)
-        {
-          kid.particles[i].x = 16;
-          kid.particles[i].y = -4 + random(13);
-        }
-
-        // Draw
-        if (kid.direction)
-          sprites.drawErase(kidcam.x - kid.particles[i].x, kidcam.y + 10 + kid.particles[i].y, particle , 0);
-        else
-          sprites.drawErase(kidcam.x + 15 + kid.particles[i].x, kidcam.y + 10 + kid.particles[i].y, particle , 0);
-      }
-    }
-  }
 }
 
 
