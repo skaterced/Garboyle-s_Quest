@@ -52,6 +52,7 @@ void stateMenuPlayContinue()
 
 void stateGameNextLevel()
 {
+    scorePlayer=wichEntrance;
   //if (level < TOTAL_LEVELS)
   //{
     if (arduboy.everyXFrames(20))
@@ -60,13 +61,13 @@ void stateGameNextLevel()
       if (coinsCollected > 0)
       {
         coinsCollected--;
-        scorePlayer += 20;
+        //scorePlayer += 20;
         //sound.tone(pgm_read_byte(tones + toneindex++), 150);
       }
       else if (balloonsLeft > 0)
       {
         balloonsLeft--;
-        scorePlayer += 30;
+        //scorePlayer += 30;
         //sound.tone(pgm_read_byte(tones + toneindex++), 150);
       }
       else

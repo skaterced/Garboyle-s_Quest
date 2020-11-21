@@ -71,6 +71,18 @@ struct HighRect
     int height;
 };
 
+class Door
+{
+  public:
+    vec2 pos;
+    uint8_t destination;
+    Door(){
+      pos.x=99;
+      pos.y=99;
+      destination=99;
+    }
+};
+
 Arduboy2Base arduboy;
 Sprites sprites;
 //ArduboyTones sound(arduboy.audio.enabled);
@@ -93,8 +105,9 @@ byte walkerFrame = 0;
 byte fanFrame = 0;
 byte coinFrame = 0;
 byte coinsActive = 0;
-vec2 levelExit = vec2(0, 0);
-vec2 startPos;
+Door levelExits [4];
+uint8_t wichEntrance = 0;
+vec2 startPos = vec2(12,12);
 byte mapTimer = 10;
 
 void loadSetEEPROM()

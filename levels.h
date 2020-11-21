@@ -26,7 +26,7 @@ bool gridGetSolid(int8_t x, int8_t y) {
   if (x < 0 || x >= LEVEL_WIDTH_CELLS)
     return 1;
 
-  if (y < 0 || y >= LEVEL_HEIGHT_CELLS)
+  if (y < 0 || y >= LEVEL_HEIGHT_CELLS)  //no more y limitation?
     return 0;
 
   const uint8_t *lvl = levels[level];
@@ -37,7 +37,8 @@ bool gridGetSolid(int8_t x, int8_t y) {
 byte gridGetTile(int8_t x, int8_t y) {
   //if (!gridGetSolid(x, y)) return 0;
   if (!gridGetSolid(x, y)) return 16;
-  return 0;
+  return 0; //don't care if it's a border
+  /*-
   //if (x < 0 || x >= LEVEL_WIDTH || y < 0 || y >= LEVEL_HEIGHT || !gridGetSolid(x, y))
   //return 0;
   //return gameGrid[x + (y * LEVEL_WIDTH_CELLS)] >> 4;
@@ -51,38 +52,27 @@ byte gridGetTile(int8_t x, int8_t y) {
   f = r | (t << 1) | (l << 2) | (b << 3);
 
   return f;
-  
-  /*f = 0;
-  f |= t << 3;
-  f |= l << 2;
-  f |= r << 1;
-  f |= b;
-
-  switch (f) {
-    case 3: i = 1; break;
-    case 7: i = 2; break;
-    case 5: i = 3; break;
-    case 11: i = 4; break;
-    case 15: i = 5; break; // solid all around
-    case 13: i = 6; break;
-    case 10: i = 7; break;
-    case 14: i = 8; break;
-    case 12: i = 9; break;
-    default: i = 10;
-  }
-
-  return i;*/
+  */
 }
 
+void clearExits(){
+  for (uint8_t i=0;i<4;i++){
+    levelExits[i].pos=vec2(99,99);
+    levelExits[i].destination=19; //just checking....
+  }
+}
 
 void levelLoad(const uint8_t *lvl) {
+  clearExits();
+  //startPos= vec2(99,99);
+  
   byte i = 0;
   lvl += LEVEL_ARRAY_SIZE >> 3;
 
   byte b = pgm_read_byte(lvl);
   while (b != 0xFF)
   {
-    byte id, x, y, h;
+    byte id, x, y;  //h?
     id = pgm_read_byte(lvl + i) & 0xE0;
     y = (pgm_read_byte(lvl + i++) & 0x1F);
     x = pgm_read_byte(lvl + i++) & 0x1F;
@@ -101,8 +91,14 @@ void levelLoad(const uint8_t *lvl) {
       case LFINISH:
         {
           // Finish
-          levelExit.x = x << 4;
-          levelExit.y = y << 4;
+          for (uint8_t j=0;j<4;j++){
+            if (99==levelExits[j].pos.x){
+              levelExits[j].pos.x = x << 4;
+              levelExits[j].pos.y = y << 4;
+              levelExits[j].destination = pgm_read_byte(lvl + i++);
+              break;
+            }
+          }
         }
         break;
       case LWALKER:
@@ -147,6 +143,12 @@ void levelLoad(const uint8_t *lvl) {
 
     b = pgm_read_byte(lvl + i);
   }
+  if (wichEntrance>0){ // must start in an exit
+    //startPos=levelExits[wichEntrance-1].pos;
+    //kid.actualpos = startPos;
+    kid.actualpos.x = levelExits[wichEntrance-1].pos.x<<5;
+    kid.actualpos.y = levelExits[wichEntrance-1].pos.y<<5;
+  }
 }
 
 void drawGrid() {
@@ -171,16 +173,15 @@ void drawGrid() {
       }
     }
   }
-  //sprites.drawPlusMask(levelExit.x - cam.pos.x, levelExit.y - cam.pos.y, sprDoor, walkerFrame);
-  //byte frame = 0;
-  //if (key.haveKey) frame = walkerFrame + 1;
-  //sprites.drawPlusMask(levelExit.x - cam.pos.x, levelExit.y - cam.pos.y, sprDoor, (walkerFrame + 1) * (key.haveKey));
-  int commonx = levelExit.x - cam.pos.x;
-  int commony = levelExit.y - cam.pos.y;
-  //sprites.drawSelfMasked(commonx, commony, largeMask, 0);
-  //sprites.drawErase(commonx, commony, sprDoor, (walkerFrame + 1) * (key.haveKey));
-  sprites.drawOverwrite(commonx, commony, door, (key.haveKey));
-  //Serial.println("End of tile drawing");
+
+  int commonx;
+  int commony;
+  for (uint8_t i=0; i<4; i++){
+    commonx = levelExits[i].pos.x - cam.pos.x;
+    commony = levelExits[i].pos.y - cam.pos.y;
+  
+    sprites.drawOverwrite(commonx, commony, door, (key.haveKey));
+  }
 }
 
 void windNoise()
@@ -225,14 +226,18 @@ void checkCollisions()
   }
 
   // Level exit
-  HighRect exitRect = {.x = levelExit.x + 4, .y = levelExit.y, .width = 8, .height = 16};
-  if (collide(exitRect, playerRect) && arduboy.justPressed(UP_BUTTON) && key.haveKey)
-  {
-    balloonsLeft = kid.hearts;
-    scoreIsVisible = true;
-    canPressButton = false;
-    level++;
-    gameState = STATE_GAME_NEXT_LEVEL;
+  for (uint8_t i=0; i<4 ; i++){
+    HighRect exitRect = {.x = levelExits[i].pos.x + 4, .y = levelExits[i].pos.y, .width = 8, .height = 16};
+    if (collide(exitRect, playerRect) && arduboy.justPressed(UP_BUTTON) && key.haveKey)
+    {
+      balloonsLeft = kid.hearts;
+      scoreIsVisible = true;
+      //canPressButton = false;
+      level=levelExits[i].destination&0x1F;
+      //level=1;
+      wichEntrance=((levelExits[i].destination&0xE0)>>5);
+      gameState = STATE_GAME_NEXT_LEVEL;
+    }
   }
 
   // Enemies and objects
@@ -389,15 +394,7 @@ void drawHUD()
 
   arduboy.fillRect(0,0,6,64,1);
   arduboy.drawLine(1,62,1,2+60-kid.wingsJauge,0);
-  /*
-  for (byte i = 15; i < 16; --i)
-  {
-    sprites.drawSelfMasked(i * 8, 0, smallMask, 0);
-  }
-  drawBalloonLives();
-  drawNumbers(91, 0, FONT_SMALL, DATA_SCORE);
-  //if (coinsCollected < 6 || walkerFrame == 0)
-  drawCoinHUD();
-  if (key.haveKey) sprites.drawOverwrite(28, 0, elementsHUD, 13);*/
+   drawNumbers(91, 0, FONT_SMALL, DATA_SCORE);
+ 
 }
 #endif

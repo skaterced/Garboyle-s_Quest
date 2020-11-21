@@ -69,6 +69,7 @@ struct Players
           fireBalls[i].speed.x= (direction? -1:1)*WEAPON_SPEED;
           //fireBalls[i].speed.y=0;
           shootingTimer=SHOOT_TIMER_INIT;
+          fireBalls[i].timer=SHOT_TIMER;
           break;
         }
       }

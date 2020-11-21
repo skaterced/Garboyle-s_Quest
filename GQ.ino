@@ -14,15 +14,6 @@
 
   Game License: MIT : https://opensource.org/licenses/MIT
 
-
-After I removed the audio:
-Sketch uses 26780 bytes (93%) of program storage space. Maximum is 28672 bytes.
-Global variables use 1653 bytes (64%) of dynamic memory, leaving 907 bytes for local variables. Maximum is 2560 bytes.
-
-
-
-
-
 */
 
 //determine the game

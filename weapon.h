@@ -7,7 +7,8 @@
 #include "vec2.h"
 
 #define MAX_WEAPON 2
-#define WEAPON_SPEED 40
+#define WEAPON_SPEED 60
+#define SHOT_TIMER 100
 
 extern bool gridGetSolid(int8_t x, int8_t y);
 //extern void kidHurt();
@@ -29,7 +30,7 @@ struct Weapon
     vec2 speed;
     boolean isActive;
     boolean direction; //need?
-    byte timer; //need?
+    byte timer;
     byte type;
 
     //byte balloonOffset;
@@ -45,19 +46,24 @@ struct Weapon
     
     void check(){
       if (isActive){
-        int tx2 = (((actualpos.x + speed.x) >> 5/*FIXED_POINT*/) - 2 + (speed.x > 0) * 4) >> 4;
-        boolean solidH = gridGetSolid(tx2, (pos.y + 1) >> 4) || gridGetSolid(tx2, (pos.y + 3) >> 4);      
-         // -X Position
-        if (!solidH)
-        {
-          actualpos.x += speed.x;
-        }
-        else
-        {
+        if (--timer==0){
           isActive=false;
         }
-        pos.x = (actualpos.x >> 5);   
-      }      
+        else {
+          int tx2 = (((actualpos.x + speed.x) >> 5/*FIXED_POINT*/) - 2 + (speed.x > 0) * 4) >> 4;
+          boolean solidH = gridGetSolid(tx2, (pos.y + 1) >> 4) || gridGetSolid(tx2, (pos.y + 3) >> 4);      
+           // -X Position
+          if (!solidH)
+          {
+            actualpos.x += speed.x;
+          }
+          else
+          {
+            isActive=false;
+          }
+          pos.x = (actualpos.x >> 5);   
+        }      
+      }
     }
 };
 
