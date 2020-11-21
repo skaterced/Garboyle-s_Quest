@@ -33,10 +33,10 @@ bool gridGetSolid(int8_t x, int8_t y) {
   byte b = pgm_read_byte(lvl + (x >> 3) + (y * (LEVEL_WIDTH_CELLS >> 3)));
   return ((b >> (x % 8)) & 0x01);
 }
-
-byte gridGetTile(int8_t x, int8_t y) {
+/*
+bool gridGetTile(int8_t x, int8_t y) {
   //if (!gridGetSolid(x, y)) return 0;
-  if (!gridGetSolid(x, y)) return 16;
+  if (!gridGetSolid(x, y)) return ;
   return 0; //don't care if it's a border
   /*-
   //if (x < 0 || x >= LEVEL_WIDTH || y < 0 || y >= LEVEL_HEIGHT || !gridGetSolid(x, y))
@@ -52,24 +52,26 @@ byte gridGetTile(int8_t x, int8_t y) {
   f = r | (t << 1) | (l << 2) | (b << 3);
 
   return f;
-  */
-}
+  
+}*/
 
 void clearExits(){
   for (uint8_t i=0;i<4;i++){
-    levelExits[i].pos=vec2(99,99);
+    levelExits[i].pos=vec2(-1,-1);
     levelExits[i].destination=19; //just checking....
   }
 }
 
 void levelLoad(const uint8_t *lvl) {
   clearExits();
-  //startPos= vec2(99,99);
   
   byte i = 0;
   lvl += LEVEL_ARRAY_SIZE >> 3;
+  
+  lvlSettings=pgm_read_byte(lvl);
 
-  byte b = pgm_read_byte(lvl);
+  byte b = pgm_read_byte(lvl+++i);
+  
   while (b != 0xFF)
   {
     byte id, x, y;  //h?
@@ -92,7 +94,7 @@ void levelLoad(const uint8_t *lvl) {
         {
           // Finish
           for (uint8_t j=0;j<4;j++){
-            if (99==levelExits[j].pos.x){
+            if (-1==levelExits[j].pos.x){
               levelExits[j].pos.x = x << 4;
               levelExits[j].pos.y = y << 4;
               levelExits[j].destination = pgm_read_byte(lvl + i++);
@@ -167,9 +169,9 @@ void drawGrid() {
     for ( int y = (cam.pos.y >> 4); y <= (cam.pos.y >> 4) + 4; ++y)
     {
       {
-        byte tile = gridGetTile(x, y);
-        if (tile != 16)
-          sprites.drawOverwrite((x << 4) - cam.pos.x, (y << 4) - cam.pos.y, tileSetTwo, tile);
+        //byte tile = gridGetTile(x, y);
+        if (gridGetSolid(x,y))
+          sprites.drawOverwrite((x << 4) - cam.pos.x, (y << 4) - cam.pos.y, tileSetTwo, lvlSettings&0x0F);
       }
     }
   }
@@ -177,10 +179,12 @@ void drawGrid() {
   int commonx;
   int commony;
   for (uint8_t i=0; i<4; i++){
-    commonx = levelExits[i].pos.x - cam.pos.x;
-    commony = levelExits[i].pos.y - cam.pos.y;
-  
-    sprites.drawOverwrite(commonx, commony, door, (key.haveKey));
+    if (-1!=levelExits[i].pos.y){
+      commonx = levelExits[i].pos.x - cam.pos.x;
+      commony = levelExits[i].pos.y - cam.pos.y;
+    
+      sprites.drawOverwrite(commonx, commony, door, (key.haveKey));
+    }
   }
 }
 
@@ -227,16 +231,18 @@ void checkCollisions()
 
   // Level exit
   for (uint8_t i=0; i<4 ; i++){
-    HighRect exitRect = {.x = levelExits[i].pos.x + 4, .y = levelExits[i].pos.y, .width = 8, .height = 16};
-    if (collide(exitRect, playerRect) && arduboy.justPressed(UP_BUTTON) && key.haveKey)
-    {
-      balloonsLeft = kid.hearts;
-      scoreIsVisible = true;
-      //canPressButton = false;
-      level=levelExits[i].destination&0x1F;
-      //level=1;
-      wichEntrance=((levelExits[i].destination&0xE0)>>5);
-      gameState = STATE_GAME_NEXT_LEVEL;
+    if (-1!=levelExits[i].pos.y){
+      HighRect exitRect = {.x = levelExits[i].pos.x + 4, .y = levelExits[i].pos.y, .width = 8, .height = 16};
+      if (collide(exitRect, playerRect) && arduboy.justPressed(UP_BUTTON) && key.haveKey)
+      {
+        balloonsLeft = kid.hearts;
+        scoreIsVisible = true;
+        //canPressButton = false;
+        level=levelExits[i].destination&0x1F;
+        //level=1;
+        wichEntrance=((levelExits[i].destination&0xE0)>>5);
+        gameState = STATE_GAME_NEXT_LEVEL;
+      }
     }
   }
 
@@ -392,9 +398,9 @@ void drawHUD()
 {
   //for (byte i = 0; i < 16; i++)
 
-  arduboy.fillRect(0,0,6,64,1);
+  arduboy.fillRect(0,0,7,64,1);
   arduboy.drawLine(1,62,1,2+60-kid.wingsJauge,0);
-   drawNumbers(91, 0, FONT_SMALL, DATA_SCORE);
- 
+   drawNumbers(91, 0, FONT_SMALL, DATA_SCORE); //for test
+  drawLives();
 }
 #endif

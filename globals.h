@@ -9,7 +9,7 @@
    start each level without
    recovering balloons.
   ----------------------------*/
-//#define HARD_MODE
+#define HARD_MODE
 
 #include <Arduino.h>
 #include <Arduboy2.h>
@@ -109,6 +109,7 @@ Door levelExits [4];
 uint8_t wichEntrance = 0;
 vec2 startPos = vec2(12,12);
 byte mapTimer = 10;
+uint8_t lvlSettings=0;
 
 void loadSetEEPROM()
 {

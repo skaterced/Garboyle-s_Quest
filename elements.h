@@ -12,11 +12,11 @@
 #define DATA_SCORE                1
 #define DATA_LEVEL                2
 
-void drawBalloonLives()
+void drawLives()
 {
   for (byte i = 0; i < kid.hearts; ++i)
   {
-    sprites.drawOverwrite((i * 7) + 2, 0, elementsHUD, 10);
+    sprites.drawErase(3,(i * 5)+3, hearts, 0);
   }
 }
 

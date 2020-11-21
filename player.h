@@ -283,10 +283,11 @@ void checkKid()
     }
     else
     {
+      kid.direction=(kid.speed.x<0); //because of the inertia
       kid.speed.x = 0;
       kid.actualpos.x = ((((kid.pos.x + 6) >> 4) << 4) + ((!kid.direction) * 4)) << (FIXED_POINT);      
       if ( gridGetSolid(tx2, (kid.pos.y + 7) >> 4) || gridGetSolid(tx2, (kid.pos.y + 8) >> 4)){ //shorter region         
-        if (!kid.isWalking){   //stick to the wall
+        if (!kid.isWalking){   //stick to the wall          
           kid.isClimbing=true;
           kid.wingsJauge = 60;
           kid.isJumping = false;
