@@ -7,6 +7,7 @@
 //#include "Point.h"
 #include "player.h"
 
+/*
 #define LSTART  0
 #define LFINISH 1 << 5
 #define LWALKER 2 << 5
@@ -14,7 +15,7 @@
 #define LSPIKES 4 << 5
 #define LCOIN   5 << 5
 #define LKEY    6 << 5
-
+*/
 
 //char gameGrid[LEVEL_ARRAY_SIZE]; // grid with cell information
 // upper byte tile xxxx ____
@@ -183,7 +184,7 @@ void drawGrid() {
       commonx = levelExits[i].pos.x - cam.pos.x;
       commony = levelExits[i].pos.y - cam.pos.y;
     
-      sprites.drawOverwrite(commonx, commony, door, (key.haveKey));
+      sprites.drawOverwrite(commonx, commony, door, 1);// (key.haveKey));
     }
   }
 }
@@ -233,13 +234,11 @@ void checkCollisions()
   for (uint8_t i=0; i<4 ; i++){
     if (-1!=levelExits[i].pos.y){
       HighRect exitRect = {.x = levelExits[i].pos.x + 4, .y = levelExits[i].pos.y, .width = 8, .height = 16};
-      if (collide(exitRect, playerRect) && arduboy.justPressed(UP_BUTTON) && key.haveKey)
+      if (collide(exitRect, playerRect) && arduboy.justPressed(UP_BUTTON) )// && key.haveKey)
       {
         balloonsLeft = kid.hearts;
-        scoreIsVisible = true;
-        //canPressButton = false;
-        level=levelExits[i].destination&0x1F;
-        //level=1;
+        scoreIsVisible = true;        
+        level=levelExits[i].destination&0x1F;        
         wichEntrance=((levelExits[i].destination&0xE0)>>5);
         gameState = STATE_GAME_NEXT_LEVEL;
       }
@@ -400,7 +399,7 @@ void drawHUD()
 
   arduboy.fillRect(0,0,7,64,1);
   arduboy.drawLine(1,62,1,2+60-kid.wingsJauge,0);
-   drawNumbers(91, 0, FONT_SMALL, DATA_SCORE); //for test
+  // drawNumbers(91, 0, FONT_SMALL, DATA_SCORE); //for test
   drawLives();
 }
 #endif

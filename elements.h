@@ -21,7 +21,7 @@ void drawLives()
 }
 
 void drawCoinHUD()
-{
+{/*
   //for (byte i = 0; i < MAX_PER_TYPE; ++i)
   for (byte i = MAX_PER_TYPE-1; i < MAX_PER_TYPE; --i)
   {
@@ -29,7 +29,7 @@ void drawCoinHUD()
       sprites.drawOverwrite(40 + (i * 6), 0, elementsHUD, 11);
     else
       sprites.drawOverwrite(40 + (i * 6), 0, elementsHUD, 12);
-  }
+  }*/
 }
 
 void drawNumbers(byte numbersX, byte numbersY, byte fontType, byte data)
@@ -63,7 +63,7 @@ void drawNumbers(byte numbersX, byte numbersY, byte fontType, byte data)
     switch (fontType)
     {
       case FONT_SMALL:
-        sprites.drawOverwrite(numbersX + (6 * i), numbersY, elementsHUD, 0);
+//        sprites.drawOverwrite(numbersX + (6 * i), numbersY, elementsHUD, 0);
         break;
       case FONT_BIG:
         sprites.drawSelfMasked(numbersX + (7 * i), numbersY, numbersBig, 0);
@@ -85,7 +85,7 @@ void drawNumbers(byte numbersX, byte numbersY, byte fontType, byte data)
     switch (fontType)
     {
       case FONT_SMALL:
-        sprites.drawOverwrite(numbersX + (pad * 6) + (6 * i), numbersY, elementsHUD, digit);
+//        sprites.drawOverwrite(numbersX + (pad * 6) + (6 * i), numbersY, elementsHUD, digit);
         break;
       case FONT_BIG:
         sprites.drawSelfMasked(numbersX + (pad * 7) + (7 * i), numbersY, numbersBig, digit);

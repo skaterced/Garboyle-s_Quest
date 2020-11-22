@@ -66,7 +66,9 @@ struct Players
           fireBalls[i].actualpos.x=actualpos.x;
           //fireBalls[i].actualpos.y=actualpos.y;
           //fireBalls[i].direction=direction; //need?
-          fireBalls[i].speed.x= (direction? -1:1)*WEAPON_SPEED;
+          bool dir = direction;
+          if (isClimbing) dir=!dir ;
+          fireBalls[i].speed.x= (dir? -1:1)*WEAPON_SPEED;
           //fireBalls[i].speed.y=0;
           shootingTimer=SHOOT_TIMER_INIT;
           fireBalls[i].timer=SHOT_TIMER;
