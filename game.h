@@ -146,6 +146,8 @@ void stateGameNextLevel()
 
 void stateGamePlaying()
 {
+  globalCounter++;
+  
   checkInputs();
   checkKid();
   updateCamera();

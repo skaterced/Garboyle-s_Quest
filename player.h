@@ -374,11 +374,14 @@ void drawKid()
       //sprites.drawSelfMasked(kidcam.x, kidcam.y, kidSprite, 12 + kid.direction);
       //sprites.drawErase(kidcam.x, kidcam.y, kidSprite, kid.frame + 6 * kid.direction + ((kid.isJumping << 2) + 5 * (kid.isLanding || kid.isFlying)) * !kid.isSucking);
       sprites.drawOverwrite(kidcam.x, kidcam.y, kidSprite, kid.frame + 7 * kid.direction + ((kid.isJumping << 2) + 5 * (kid.isLanding || kid.isFlying)) * !kid.isSucking + kid.isClimbing*6 );
+      if (kid.isFlying){
+        sprites. drawSelfMasked(kidcam.x-8, kidcam.y,wings_bitmap,(globalCounter&0x04)>>2);
+      }
     }
 
     else
     {
-      sprites.drawPlusMask(kidcam.x - 2, kidcam.y, Firing_plus_mask, walkerFrame + 2*kid.direction); //kidSpriteSuck
+      sprites.drawPlusMask(kidcam.x , kidcam.y, Firing_plus_mask, kid.isClimbing + 2*kid.direction); //kidSpriteSuck
       for (byte i = 0; i < PLAYER_PARTICLES; ++i)
       {
         // Update
