@@ -289,7 +289,7 @@ void checkKid()
       kid.speed.x = 0;
       kid.actualpos.x = ((((kid.pos.x + 6) >> 4) << 4) + ((!kid.direction) * 4)) << (FIXED_POINT);      
       if ( gridGetSolid(tx2, (kid.pos.y + 7) >> 4) || gridGetSolid(tx2, (kid.pos.y + 8) >> 4)){ //shorter region         
-        if (!kid.isWalking){   //stick to the wall          
+        if (!arduboy.pressed(DOWN_BUTTON)&&(!kid.isWalking)){   //stick to the wall          
           kid.isClimbing=true;
           kid.wingsJauge = 60;
           kid.isJumping = false;
@@ -377,12 +377,15 @@ void drawKid()
       if (kid.isFlying){
         sprites. drawSelfMasked(kidcam.x-8, kidcam.y,wings_bitmap,(globalCounter&0x04)>>2);
       }
+      else if (kid.isJumping||kid.isLanding ){
+        sprites. drawSelfMasked(kidcam.x-8, kidcam.y,wings_bitmap,2);
+      }
     }
 
     else
     {
       sprites.drawPlusMask(kidcam.x , kidcam.y, Firing_plus_mask, kid.isClimbing + 2*kid.direction); //kidSpriteSuck
-      for (byte i = 0; i < PLAYER_PARTICLES; ++i)
+      /*for (byte i = 0; i < PLAYER_PARTICLES; ++i)
       {
         // Update
         if (kid.particles[i].y > 2) --kid.particles[i].y;
@@ -399,7 +402,7 @@ void drawKid()
           sprites.drawErase(kidcam.x - kid.particles[i].x, kidcam.y + 10 + kid.particles[i].y, particle , 0);
         else
           sprites.drawErase(kidcam.x + 15 + kid.particles[i].x, kidcam.y + 10 + kid.particles[i].y, particle , 0);
-      }
+      }*/
     }
   }
 }

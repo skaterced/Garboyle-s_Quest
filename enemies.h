@@ -226,7 +226,8 @@ void enemiesUpdate()
     {
       int commonx = spikes[i].pos.x - cam.pos.x;
       int commony = spikes[i].pos.y - cam.pos.y;
-      sprites.drawOverwrite(commonx, commony, sprSpikes,  spikes[i].characteristics & B00000011);
+      //sprites.drawOverwrite(commonx, commony, sprSpikes,  spikes[i].characteristics & B00000011);
+      sprites.drawErase(commonx, commony, sprSpikes,  spikes[i].characteristics & B00000011);
       if (!bitRead(spikes[i].characteristics, 0)) {
         for (int l = 8; l < spikes[i].pos.height; l += 8)
           sprites.drawOverwrite(commonx, commony + l, sprSpikes,  spikes[i].characteristics & B00000011);
