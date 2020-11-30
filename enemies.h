@@ -37,7 +37,7 @@ Key key = {.pos = vec2(0, 0), .active = false, .haveKey = false};
 struct Walker
 {
   vec2 pos;
-  int8_t direction;
+  bool direction; //true if heading right
   int8_t HP;
   bool hurt;
   bool active;
@@ -95,7 +95,7 @@ void enemiesInit()
     walkers[i].pos.y = 0;
     walkers[i].active = false;
     walkers[i].HP = 30;
-    walkers[i].direction = 1;
+    walkers[i].direction = true;
     walkers[i].hurt = false;
 
     // Coins
@@ -136,7 +136,7 @@ void walkersCreate(vec2 pos)
     if (!walkers[i].active)
     {
       walkers[i].pos = pos << 4;
-      walkers[i].pos.y += 8;
+      walkers[i].pos.y += 4;
       walkers[i].active = true;
       return;
     }
@@ -205,7 +205,7 @@ void fansCreate(vec2 pos, byte height, uint8_t dir = FAN_UP)
 
 void enemiesUpdate()
 {
-  if (arduboy.everyXFrames(8))
+  if (arduboy.everyXFrames(6))
   {
     walkerFrame = (++walkerFrame) % 2;
     coinFrame = (++coinFrame) % 4;
@@ -239,9 +239,9 @@ void enemiesUpdate()
     }
   }
 
-  if (arduboy.everyXFrames(4)) fanFrame = (++fanFrame) % 3;
+//  if (arduboy.everyXFrames(4)) fanFrame = (++fanFrame) % 3;
   for (byte i = 0; i < MAX_PER_TYPE; ++i)
-  {
+  {/*
     // Fans
     if (fans[i].active)
     {
@@ -276,24 +276,29 @@ void enemiesUpdate()
       //else if (fans[i].dir > FAN_RIGHT) foff += 6;
       sprites.drawOverwrite(_x, _y, fan, fanFrame + foff);
     }
-
+*/
     // Walkers
     if (walkers[i].active)
     {
-      if (arduboy.everyXFrames(2) && walkers[i].HP > 0 && !walkers[i].hurt)
+      if (arduboy.everyXFrames(2) && walkers[i].HP > 0 )
       {
-        if (!gridGetSolid((walkers[i].pos.x + 4 + (walkers[i].direction * 5)) >> 4, walkers[i].pos.y >> 4)
-            && gridGetSolid((walkers[i].pos.x + 4 + (walkers[i].direction * 5)) >> 4, (walkers[i].pos.y >> 4) + 1))
+        if (!gridGetSolid((walkers[i].pos.x + (walkers[i].direction? 1:-1)) >> 4, walkers[i].pos.y >> 4))
+            /*&& gridGetSolid((walkers[i].pos.x + 4 + (walkers[i].direction * 5)) >> 4, (walkers[i].pos.y >> 4) + 1))*/
         {
-          walkers[i].pos.x += walkers[i].direction;
+          walkers[i].pos.x += walkers[i].direction? 1:-1;
         }
         else
         {
-          walkers[i].direction = -walkers[i].direction;
+          walkers[i].direction = !walkers[i].direction;
         }
       }
 
-      sprites.drawOverwrite(walkers[i].pos.x - cam.pos.x, walkers[i].pos.y - cam.pos.y, walkerSprite, walkerFrame + (walkers[i].HP <= 0) * 2);
+      //sprites.drawOverwrite(walkers[i].pos.x - cam.pos.x, walkers[i].pos.y - cam.pos.y, walkerSprite, walkerFrame + (walkers[i].HP <= 0) * 2);
+      //sprites.drawErase(walkers[i].pos.x - cam.pos.x, walkers[i].pos.y - cam.pos.y, BatSprite, 2);
+      sprites.drawSelfMasked(walkers[i].pos.x - cam.pos.x, walkers[i].pos.y - cam.pos.y, BatSprite, walkerFrame + (walkers[i].HP <= 0) * 2);
+      // Bat's eyes
+      arduboy.drawPixel(walkers[i].pos.x - cam.pos.x + (walkers[i].direction? 4:3), walkers[i].pos.y - cam.pos.y+3,0);
+      arduboy.drawPixel(walkers[i].pos.x - cam.pos.x + (walkers[i].direction? 6:5), walkers[i].pos.y - cam.pos.y+3,0);
     }
 
     // Coins

@@ -219,7 +219,7 @@ void checkCollisions()
     return;
 
   HighRect playerRect = {.x = kid.pos.x + 2, .y = kid.pos.y + 2, .width = 8, .height = 12};
-  HighRect playerSuckRect = {.x = kid.pos.x + ((kid.direction ^ 1) * 16) - (kid.direction * 16), .y = kid.pos.y + 2, .width = 16, .height = 14};
+  //HighRect playerSuckRect = {.x = kid.pos.x + ((kid.direction ^ 1) * 16) - (kid.direction * 16), .y = kid.pos.y + 2, .width = 16, .height = 14};
 
   // Key
   HighRect keyRect = {.x = key.pos.x, .y = key.pos.y, .width = 8, .height = 16};
@@ -253,15 +253,7 @@ void checkCollisions()
     if (coins[i].active)
     {
       HighRect coinrect = {.x = coins[i].pos.x, .y = coins[i].pos.y, .width = 10, .height = 12};
-      if (kid.isSucking && collide(playerSuckRect, coinrect))
-      {
-        // Suck coin closer
-        if (kid.direction)
-          ++coins[i].pos.x;
-        else
-          --coins[i].pos.x;
-      }
-      else if (collide(playerRect, coinrect))
+      if (collide(playerRect, coinrect))
       {
         // Collect coin
         coins[i].active = false;
@@ -293,49 +285,30 @@ void checkCollisions()
     // Getting Sucked In
     if (walkers[i].active)
     {
-      HighRect walkerrect = {.x = walkers[i].pos.x, .y = walkers[i].pos.y, .width = 8, .height = 8};
-      if (collide(playerSuckRect, walkerrect) && kid.isSucking)
-      {
-        --walkers[i].HP;
-        walkers[i].hurt = true;
-        if (walkers[i].HP <= 0)
-        {
-          if (kid.direction)
+      HighRect walkerRect = {.x = walkers[i].pos.x, .y = walkers[i].pos.y, .width = 10, .height = 8};
+      for (uint8_t j=0; j<MAX_WEAPON; j++){
+        if (kid.fireBalls[j].isActive){
+          HighRect projectileRect = {.x = kid.fireBalls[j].pos.x, .y = kid.fireBalls[j].pos.y, .width = 4, .height = 4};
+          if (collide(projectileRect, walkerRect))
           {
-            ++walkers[i].pos.x;
-            if (walkers[i].pos.x > kid.pos.x - 8)
-            {
+            walkers[i].HP-=15; //todo define dmg
+            kid.fireBalls[j].isActive=false;
+            walkers[i].hurt = true;
+            if (walkers[i].HP <= 0) {
               walkers[i].active = false;
-              if (kid.hearts < 3) ++kid.hearts;
-              else scorePlayer += 100;
-              scorePlayer += 50;
-              //sound.tone(200, 100);
             }
           }
           else
-          {
-            --walkers[i].pos.x;
-            if (walkers[i].pos.x < kid.pos.x + 16)
-            {
-              walkers[i].active = false;
-              if (kid.hearts < 3) ++kid.hearts;
-              else scorePlayer += 100;
-              scorePlayer += 50;
-              //sound.tone(200, 100);
-            }
+            walkers[i].hurt = false;
           }
-        }
       }
-      else
-        walkers[i].hurt = false;
-
       // Hurt player
-      if (collide(playerRect, walkerrect) && walkers[i].HP > 0 && !kid.isImune)
+      if (collide(playerRect, walkerRect) && walkers[i].HP > 0 && !kid.isImune)
       {
         kidHurt();
         kid.speed.y = PLAYER_JUMP_VELOCITY;
         kid.speed.x = max(min((kid.pos.x - walkers[i].pos.x - 2), 3), -3) << FIXED_POINT;
-      }
+      }      
     }
     // Fans
     if (fans[i].active)

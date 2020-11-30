@@ -61,8 +61,8 @@ struct Players
       for (uint8_t i=0; i<MAX_WEAPON; i++){
         if ((!fireBalls[i].isActive)&&(0==shootingTimer)){
           fireBalls[i].isActive=true;
-          fireBalls[i].pos.x=pos.x;
-          fireBalls[i].pos.y=pos.y+3;
+          fireBalls[i].pos.x=pos.x+4;
+          fireBalls[i].pos.y=pos.y+4;
           fireBalls[i].actualpos.x=actualpos.x;
           //fireBalls[i].actualpos.y=actualpos.y;
           //fireBalls[i].direction=direction; //need?
@@ -182,7 +182,7 @@ void checkKid()
   if (kid.hearts == 0 || kid.speed.y > 0 || !solidbelow)
   {
     //kid.speed.y += GRAVITY;
-    if (!kid.isClimbing) {
+    if ((kid.hearts==0)||(!kid.isClimbing)) {
       kid.speed.y = (kid.speed.y > -MAX_YSPEED) ? kid.speed.y - GRAVITY : -MAX_YSPEED;
       if (kid.isFlying)
       {
