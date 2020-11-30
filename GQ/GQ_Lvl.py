@@ -18,6 +18,11 @@ pixels = im.load()
 
 size=24
 
+for y in range(0, size):
+    for x in range(0,size):
+        print(pixels[x,y])
+
+
 i=0
 print("B", end='')
 for y in range(0, size):
@@ -25,7 +30,7 @@ for y in range(0, size):
         for x in range(0,8):
             #print("i",i,"j",j)
             #print (pixels[x,y][0])
-            if (pixels[(7-x)+b*8,y]==(255,255,255)):
+            if (pixels[(7-x)+b*8,y]==(255,255,255,255)):
                 print ("1", end='')
             else:
                 print("0", end='')
@@ -40,19 +45,19 @@ for y in range(0, size):
 print ("//Lvl Settings")
 print("0x00,")
 
-spike=(255,0,0) #rouge
-start=(0,255,255) #cyan
-ennemi=(0,0,255) #bleu
-coin=(255,255,0) #jaune
+spike=(255,0,0,255) #rouge
+start=(0,255,255,255) #cyan
+ennemi=(0,0,255,255) #bleu
+coin=(255,255,0,255) #jaune
 
 
 for y in range(0, size):
     for x in range(0,size):
-        if (pixels[x,y]==(255,0,0)):
+        if (pixels[x,y]==coin):
             print("BOO!")
 
 
 #print("0x%x"%(64))
 """
 
-"""
+        """
