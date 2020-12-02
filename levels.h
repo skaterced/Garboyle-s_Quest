@@ -10,7 +10,7 @@
 /*
 #define LSTART  0
 #define LFINISH 1 << 5
-#define LWALKER 2 << 5
+#define LBAT    2 << 5
 #define LFAN    3 << 5
 #define LSPIKES 4 << 5
 #define LCOIN   5 << 5
@@ -34,27 +34,6 @@ bool gridGetSolid(int8_t x, int8_t y) {
   byte b = pgm_read_byte(lvl + (x >> 3) + (y * (LEVEL_WIDTH_CELLS >> 3)));
   return ((b >> (x % 8)) & 0x01);
 }
-/*
-bool gridGetTile(int8_t x, int8_t y) {
-  //if (!gridGetSolid(x, y)) return 0;
-  if (!gridGetSolid(x, y)) return ;
-  return 0; //don't care if it's a border
-  /*-
-  //if (x < 0 || x >= LEVEL_WIDTH || y < 0 || y >= LEVEL_HEIGHT || !gridGetSolid(x, y))
-  //return 0;
-  //return gameGrid[x + (y * LEVEL_WIDTH_CELLS)] >> 4;
-  byte l, r, t, b, f, i;
-  l = gridGetSolid(x - 1, y);
-  t = gridGetSolid(x, y - 1);
-  r = gridGetSolid(x + 1, y);
-  b = gridGetSolid(x, y + 1);
-
-  f = 0;
-  f = r | (t << 1) | (l << 2) | (b << 3);
-
-  return f;
-  
-}*/
 
 void clearExits(){
   for (uint8_t i=0;i<4;i++){
@@ -104,24 +83,18 @@ void levelLoad(const uint8_t *lvl) {
           }
         }
         break;
-      case LWALKER:
+      case LBAT:
         {
-          // Walker
-          walkersCreate(vec2(x, y));
+          // Bat
+          batsCreate(vec2(x, y));
         }
         break;
-      case LFAN:
+      case LGHOST:
         {
-          // Fan
-          byte t = pgm_read_byte(lvl + i++);
-          if (t < 64)
-            fansCreate(vec2(x, y), t);
-          else if (t < 192)
-            fansCreate(vec2(x, y), t & 0x3F, FAN_RIGHT);
-          else
-            fansCreate(vec2(x, y), t & 0x3F, FAN_LEFT);
+          // Ghost
+          ghostsCreate(vec2(x, y));
         }
-        break;
+        break;        
       case LSPIKES:
         {
           // Spikes
@@ -184,7 +157,7 @@ void drawGrid() {
       commonx = levelExits[i].pos.x - cam.pos.x;
       commony = levelExits[i].pos.y - cam.pos.y;
     
-      sprites.drawOverwrite(commonx, commony, door, 1);// (key.haveKey));
+      sprites.drawOverwrite(commonx, commony, door, 0);// (key.haveKey));
     }
   }
 }
@@ -255,108 +228,66 @@ void checkCollisions()
       HighRect coinrect = {.x = coins[i].pos.x, .y = coins[i].pos.y, .width = 10, .height = 12};
       if (collide(playerRect, coinrect))
       {
-        // Collect coin
-        coins[i].active = false;
-        --coinsActive;
-        ++coinsCollected;
-        ++totalCoins;
-        //sound.tone(400, 200);
-        if (coinsActive == 0)
-        {
-          #ifndef HARD_MODE
-          scorePlayer += 500;
-          #else
-          scorePlayer += 1000;
-          #endif
-          //sound.tone(400, 200);
-        }
-        else
-        {
-          #ifndef HARD_MODE
-          scorePlayer += 200;
-          #else
-          scorePlayer += 400;
-          #endif
-          //sound.tone(370, 200);
+        if (kid.hearts<3){ //todo changeable hearts max
+          coins[i].active=false;
+          kid.hearts++;
         }
       }
     }
-    // Walkers
-    // Getting Sucked In
-    if (walkers[i].active)
+    // Bats
+    if (bats[i].active)
     {
-      HighRect walkerRect = {.x = walkers[i].pos.x, .y = walkers[i].pos.y, .width = 10, .height = 8};
+      HighRect ennemiRect = {.x = bats[i].pos.x, .y = bats[i].pos.y, .width = 10, .height = 8};
       for (uint8_t j=0; j<MAX_WEAPON; j++){
         if (kid.fireBalls[j].isActive){
           HighRect projectileRect = {.x = kid.fireBalls[j].pos.x, .y = kid.fireBalls[j].pos.y, .width = 4, .height = 4};
-          if (collide(projectileRect, walkerRect))
+          if (collide(projectileRect, ennemiRect))
           {
-            walkers[i].HP-=15; //todo define dmg
+            bats[i].HP-=15; //todo define dmg
             kid.fireBalls[j].isActive=false;
-            walkers[i].hurt = true;
-            if (walkers[i].HP <= 0) {
-              walkers[i].active = false;
-            }
+            bats[i].hurt = true;
+            /*if (bats[i].HP <= 0) {
+              bats[i].active = false;
+            }*/
           }
           else
-            walkers[i].hurt = false;
+            bats[i].hurt = false;
           }
       }
       // Hurt player
-      if (collide(playerRect, walkerRect) && walkers[i].HP > 0 && !kid.isImune)
+      if (collide(playerRect, ennemiRect) && bats[i].HP > 0 && !kid.isImune)
       {
         kidHurt();
-        kid.speed.y = PLAYER_JUMP_VELOCITY;
-        kid.speed.x = max(min((kid.pos.x - walkers[i].pos.x - 2), 3), -3) << FIXED_POINT;
+        kid.speed.y = PLAYER_JUMP_VELOCITY/2;
+        kid.speed.x = max(min((kid.pos.x - bats[i].pos.x - 2), 2), -2) << FIXED_POINT;
       }      
     }
-    // Fans
-    if (fans[i].active)
-    {
-      HighRect fanrect;
-      switch (fans[i].dir)
-      {
-        case FAN_UP:
-        fanrect.x = fans[i].pos.x;
-        fanrect.y = fans[i].pos.y - fans[i].height;
-        fanrect.width = 16;
-        fanrect.height = fans[i].height;
-        break;
-        case FAN_RIGHT:
-        fanrect.x = fans[i].pos.x + 16;
-        fanrect.y = fans[i].pos.y;
-        fanrect.width = fans[i].height;
-        fanrect.height = 16;
-        break;
-        default:
-        fanrect.x = fans[i].pos.x - fans[i].height;
-        fanrect.y = fans[i].pos.y;
-        fanrect.width = fans[i].height;
-        fanrect.height = 16;
-      }
-      /*HighRect fanrect = {.x = fans[i].pos.x, .y = fans[i].pos.y - (fans[i].height),
-                      .width = 16, .height = fans[i].height
-                     };*/
-      if (collide(playerRect, fanrect) && kid.isFlying)
-      {
-        switch (fans[i].dir)
-        {
-          case FAN_UP:
-          kid.speed.y = min(kid.speed.y + FAN_POWER, MAX_YSPEED);
-          break;
-          case FAN_RIGHT:
-          kid.speed.x = min(kid.speed.x + FAN_POWER, MAX_XSPEED_FAN);
-          break;
-          default:
-          kid.speed.x = max(kid.speed.x - FAN_POWER, -MAX_XSPEED_FAN);
-        }
-        //kid.speed.y = min(kid.speed.y + FAN_POWER, MAX_YSPEED);
-        //if (arduboy.everyXFrames(3)) sound.tone(330 + random(20), 30);
-        windNoise();
-        //kid.actualpos.y -= FAN_POWER;
-      }
-    }
 
+    if (ghosts[i].active)
+    {
+      HighRect ennemiRect = {.x = ghosts[i].pos.x, .y = ghosts[i].pos.y, .width = 12, .height = 16};
+      for (uint8_t j=0; j<MAX_WEAPON; j++){
+        if (kid.fireBalls[j].isActive){
+          HighRect projectileRect = {.x = kid.fireBalls[j].pos.x, .y = kid.fireBalls[j].pos.y, .width = 4, .height = 4};
+          if (collide(projectileRect, ennemiRect))
+          {
+            ghosts[i].HP-=15; //todo define dmg
+            kid.fireBalls[j].isActive=false;
+            ghosts[i].hurt = true;
+          }
+          else
+            ghosts[i].hurt = false;
+          }
+      }
+      // Hurt player
+      if (collide(playerRect, ennemiRect) && ghosts[i].HP > 0 && !kid.isImune)
+      {
+        kidHurt();
+        kid.speed.y = PLAYER_JUMP_VELOCITY/2;
+        kid.speed.x = max(min((kid.pos.x - ghosts[i].pos.x - 2), 2), -2) << FIXED_POINT;
+      }      
+    }
+    
     // Spikes
     if (!kid.isImune && bitRead(spikes[i].characteristics, 2) && collide(playerRect, spikes[i].pos))
     {

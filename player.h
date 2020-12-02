@@ -61,9 +61,9 @@ struct Players
       for (uint8_t i=0; i<MAX_WEAPON; i++){
         if ((!fireBalls[i].isActive)&&(0==shootingTimer)){
           fireBalls[i].isActive=true;
-          fireBalls[i].pos.x=pos.x+4;
+          //fireBalls[i].pos.x=pos.x+4;
           fireBalls[i].pos.y=pos.y+4;
-          fireBalls[i].actualpos.x=actualpos.x;
+          fireBalls[i].actualpos.x=actualpos.x+64;
           //fireBalls[i].actualpos.y=actualpos.y;
           //fireBalls[i].direction=direction; //need?
           bool dir = direction;
@@ -288,7 +288,7 @@ void checkKid()
       kid.direction=(kid.speed.x<0); //because of the inertia
       kid.speed.x = 0;
       kid.actualpos.x = ((((kid.pos.x + 6) >> 4) << 4) + ((!kid.direction) * 4)) << (FIXED_POINT);      
-      if ( gridGetSolid(tx2, (kid.pos.y + 7) >> 4) || gridGetSolid(tx2, (kid.pos.y + 8) >> 4)){ //shorter region         
+      if ( gridGetSolid(tx2, (kid.pos.y + 7) >> 4) /*|| gridGetSolid(tx2, (kid.pos.y + 8) >> 4)*/){ //shorter region         
         if (!arduboy.pressed(DOWN_BUTTON)&&(!kid.isWalking)){   //stick to the wall          
           kid.isClimbing=true;
           kid.wingsJauge = 60;
@@ -373,36 +373,18 @@ void drawKid()
     {
       //sprites.drawSelfMasked(kidcam.x, kidcam.y, kidSprite, 12 + kid.direction);
       //sprites.drawErase(kidcam.x, kidcam.y, kidSprite, kid.frame + 6 * kid.direction + ((kid.isJumping << 2) + 5 * (kid.isLanding || kid.isFlying)) * !kid.isSucking);
-      sprites.drawOverwrite(kidcam.x, kidcam.y, kidSprite, kid.frame + 7 * kid.direction + ((kid.isJumping << 2) + 5 * (kid.isLanding || kid.isFlying)) * !kid.isSucking + kid.isClimbing*6 );
-      if (kid.isFlying){
-        sprites. drawSelfMasked(kidcam.x-8, kidcam.y,wings_bitmap,(globalCounter&0x04)>>2);
-      }
-      else if (kid.isJumping||kid.isLanding ){
-        sprites. drawSelfMasked(kidcam.x-8, kidcam.y,wings_bitmap,2);
-      }
+      sprites.drawOverwrite(kidcam.x, kidcam.y, kidSprite, kid.frame + 7 * kid.direction + ((kid.isJumping << 2) + 5 * (kid.isLanding || kid.isFlying)) * !kid.isSucking + kid.isClimbing*6 );      
     }
 
     else
     {
-      sprites.drawPlusMask(kidcam.x , kidcam.y, Firing_plus_mask, kid.isClimbing + 2*kid.direction); //kidSpriteSuck
-      /*for (byte i = 0; i < PLAYER_PARTICLES; ++i)
-      {
-        // Update
-        if (kid.particles[i].y > 2) --kid.particles[i].y;
-        else if (kid.particles[i].y < -2) ++kid.particles[i].y;
-        kid.particles[i].x -= 2;
-        if (kid.particles[i].x < 0)
-        {
-          kid.particles[i].x = 16;
-          kid.particles[i].y = -4 + random(13);
-        }
-
-        // Draw
-        if (kid.direction)
-          sprites.drawErase(kidcam.x - kid.particles[i].x, kidcam.y + 10 + kid.particles[i].y, particle , 0);
-        else
-          sprites.drawErase(kidcam.x + 15 + kid.particles[i].x, kidcam.y + 10 + kid.particles[i].y, particle , 0);
-      }*/
+      sprites.drawPlusMask(kidcam.x , kidcam.y, Firing_plus_mask, kid.isClimbing + 2*(kid.isLanding || kid.isFlying) + 3*kid.direction); //kidSpriteSuck
+    }
+    if (kid.isFlying){
+      sprites. drawSelfMasked(kidcam.x-8, kidcam.y,wings_bitmap,(globalCounter&0x04)>>2);
+    }
+    else if (kid.isJumping||kid.isLanding ){
+      sprites. drawSelfMasked(kidcam.x-8, kidcam.y,wings_bitmap,2);
     }
   }
 }
