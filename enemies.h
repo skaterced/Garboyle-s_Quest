@@ -243,8 +243,8 @@ void enemiesUpdate()
     {
       int commonx = spikes[i].pos.x - cam.pos.x;
       int commony = spikes[i].pos.y - cam.pos.y;
-      //sprites.drawOverwrite(commonx, commony, sprSpikes,  spikes[i].characteristics & B00000011);
-      sprites.drawErase(commonx, commony, sprSpikes,  spikes[i].characteristics & B00000011);
+      sprites.drawOverwrite(commonx, commony, sprSpikes,  spikes[i].characteristics & B00000011);
+      //sprites.drawErase(commonx, commony, sprSpikes,  spikes[i].characteristics & B00000011);
       if (!bitRead(spikes[i].characteristics, 0)) {
         for (int l = 8; l < spikes[i].pos.height; l += 8)
           sprites.drawOverwrite(commonx, commony + l, sprSpikes,  spikes[i].characteristics & B00000011);
@@ -284,7 +284,8 @@ void enemiesUpdate()
       }
       else{
         bats[i].HP--;
-        sprites.drawSelfMasked(bats[i].pos.x - cam.pos.x, bats[i].pos.y - cam.pos.y, BatSprite, 2);
+        if (arduboy.everyXFrames(2))
+          sprites.drawSelfMasked(bats[i].pos.x - cam.pos.x, bats[i].pos.y - cam.pos.y, BatSprite, 2);
         if (bats[i].HP<-30){
           bats[i].active=false;
         }
@@ -316,7 +317,8 @@ void enemiesUpdate()
       }
       else{
         ghosts[i].HP--;
-        sprites.drawSelfMasked(ghosts[i].pos.x - cam.pos.x, ghosts[i].pos.y - cam.pos.y, GhostSprite, 4);
+        if (arduboy.everyXFrames(2))
+          sprites.drawSelfMasked(ghosts[i].pos.x - cam.pos.x, ghosts[i].pos.y - cam.pos.y, GhostSprite, 4);
         if (ghosts[i].HP<-30){
           ghosts[i].active=false;
         }

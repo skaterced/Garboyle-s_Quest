@@ -179,6 +179,7 @@ void kidHurt()
   else
   {*/
     kid.isFlying = false;
+    kid.isClimbing = false;
     kid.hearts--;
     //sound.tone(420, 100);
     kid.isImune = true;

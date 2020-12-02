@@ -284,11 +284,11 @@ void checkKid()
       kid.actualpos.x += kid.speed.x;
     }
     else
-    {
+    {      
       kid.direction=(kid.speed.x<0); //because of the inertia
       kid.speed.x = 0;
       kid.actualpos.x = ((((kid.pos.x + 6) >> 4) << 4) + ((!kid.direction) * 4)) << (FIXED_POINT);      
-      if ( gridGetSolid(tx2, (kid.pos.y + 7) >> 4) /*|| gridGetSolid(tx2, (kid.pos.y + 8) >> 4)*/){ //shorter region         
+      if ( gridGetSolid(tx2, (kid.pos.y + 7) >> 4)&&(arduboy.pressed(RIGHT_BUTTON)||arduboy.pressed(LEFT_BUTTON))){ //shorter region         
         if (!arduboy.pressed(DOWN_BUTTON)&&(!kid.isWalking)){   //stick to the wall          
           kid.isClimbing=true;
           kid.wingsJauge = 60;
@@ -298,7 +298,7 @@ void checkKid()
           kid.jumpLetGo = false;
           kid.actualpos.y = ((kid.pos.y + 8) >> 4) << (FIXED_POINT + 4);
           kid.speed.y = 0;
-        }
+        }        
       }
     }
   }
@@ -373,7 +373,13 @@ void drawKid()
     {
       //sprites.drawSelfMasked(kidcam.x, kidcam.y, kidSprite, 12 + kid.direction);
       //sprites.drawErase(kidcam.x, kidcam.y, kidSprite, kid.frame + 6 * kid.direction + ((kid.isJumping << 2) + 5 * (kid.isLanding || kid.isFlying)) * !kid.isSucking);
-      sprites.drawOverwrite(kidcam.x, kidcam.y, kidSprite, kid.frame + 7 * kid.direction + ((kid.isJumping << 2) + 5 * (kid.isLanding || kid.isFlying)) * !kid.isSucking + kid.isClimbing*6 );      
+      //sprites.drawOverwrite(kidcam.x, kidcam.y, kidSprite, kid.frame + 7 * kid.direction + ((kid.isJumping << 2) + 5 * (kid.isLanding || kid.isFlying)) * !kid.isSucking + kid.isClimbing*6 );      
+      if (kid.isLanding || kid.isFlying || kid.isClimbing || kid.isJumping){
+        sprites.drawSelfMasked(kidcam.x, kidcam.y, kidSprite, kid.frame + 7 * kid.direction + ((kid.isJumping << 2) + 5 * (kid.isLanding || kid.isFlying)) * !kid.isSucking + kid.isClimbing*6 );      
+      }
+      else {
+        sprites.drawOverwrite(kidcam.x, kidcam.y, kidSprite, kid.frame + 7 * kid.direction );      
+      }
     }
 
     else
