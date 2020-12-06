@@ -294,7 +294,7 @@ void enemiesUpdate()
       HighRect ennemiRect = {.x = ghosts[i].pos.x, .y = ghosts[i].pos.y, .width = 100, .height = 60};
       HighRect kidPoint = {.x=kid.pos.x, .y=kid.pos.y, .width=100,.height=60}; 
       if (collide(kidPoint,ennemiRect) && ghosts[i].HP > 0){
-        //23716 - 23722
+        //23714 - 23722
         if (((0x04==(globalCounter&0x07))||(0x10==(globalCounter&0x31))||(0x17==(globalCounter&0x3F))) && (0x40!=(globalCounter&0x60))  ){
         //if (arduboy.everyXFrames(5-((globalCounter&0x30)>>4))){
           ghosts[i].direction = ghosts[i].pos.x<kid.pos.x;

@@ -9,9 +9,6 @@
 #include "elements.h"
 #include "levels.h"
 
-//lvl ups
-#define JUMPUP 1
-
 /*
 #define TOTAL_TONES 10
 PROGMEM const byte tones[] = {
@@ -55,7 +52,7 @@ void stateMenuPlayContinue()
 
 void stateGameNextLevel()
 {
-    scorePlayer=bossesAlive;
+    scorePlayer=0; //bossesAlive;
   //if (level < TOTAL_LEVELS)
   //{
     if (arduboy.everyXFrames(20))
@@ -171,24 +168,40 @@ void stateGamePause()
 
 void stateGameLvlUp()
 {
-  uint8_t wichUp;  
-  uint8_t temp=(lvlSettings&0xf0)>>4;
-  bossesAlive&=~(1<<(temp-1));
-  switch (temp){
-    case 1:
-      wichUp=JUMPUP;
+  uint8_t wichUp=getBossReward();
+  switch (wichUp){
+    case UPGRADE_JUMP:
       sprites.drawSelfMasked(30, 17, BadgeJump, 0);
+    break;
+    case UPGRADE_FIRE:
+      sprites.drawSelfMasked(30, 17, BadgeFire, 0);
+    break;
+    case UPGRADE_WINGS:
+      sprites.drawSelfMasked(30, 17, BadgeWings, 0);
+    break;
+    case UPGRADE_ARMOR:
+      sprites.drawSelfMasked(30, 17, BadgeArmor, 0);
     break;
   }
   sprites.drawSelfMasked(60, 17, BadgeLevelUp, 0);
   if (arduboy.justPressed(A_BUTTON | B_BUTTON))
   {
     switch (wichUp){
-      case JUMPUP:
+      case UPGRADE_JUMP:
         jumpVelocity+=10;
+      break;
+      case UPGRADE_FIRE:
+        firePower+=5;
+      break;
+      case UPGRADE_WINGS:
+        wingLvl++;
+      break;
+      case UPGRADE_ARMOR:
+        heartsMax++;
       break;
     }    
     bossRoom=false;
+    kid.hearts=heartsMax;
     gameState = STATE_GAME_PLAYING;
   }  
 }

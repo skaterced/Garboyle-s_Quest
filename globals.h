@@ -54,12 +54,17 @@
 #define LEVEL_WIDTH                  384                  // 24 * 16
 #define LEVEL_HEIGHT                 384                  // 24 * 16
 #define LEVEL_CELLSIZE               16
-#define LEVEL_WIDTH_CELLS            24
-#define LEVEL_HEIGHT_CELLS           24
+#define LEVEL_WIDTH_CELLS            level_width_cell //24
+#define LEVEL_HEIGHT_CELLS           level_height_cell //24
 #define LEVEL_CELL_BYTES             (LEVEL_WIDTH_CELLS * LEVEL_HEIGHT_CELLS) >> 3
-#define LEVEL_ARRAY_SIZE             576
+#define LEVEL_ARRAY_SIZE             level_width_cell*level_height_cell//576
 
 #define MAX_DOORS                    7
+//lvl ups
+#define UPGRADE_JUMP   0x01
+#define UPGRADE_FIRE   0x02
+#define UPGRADE_WINGS  0x04
+#define UPGRADE_ARMOR  0x08
 
 #define PLAYER_JUMP_TIME             11
 //#define PLAYER_JUMP_VELOCITY         30
@@ -91,8 +96,8 @@ Arduboy2Base arduboy;
 Sprites sprites;
 //ArduboyTones sound(arduboy.audio.enabled);
 
-uint8_t jumpVelocity=30;
-uint8_t firePower =5;
+uint8_t level_width_cell = 24;
+uint8_t level_height_cell = 24;
 
 byte gameState = STATE_MENU_MAIN;   // start the game with the TEAM a.r.g. logo
 byte menuSelection = STATE_MENU_PLAY; // PLAY menu item is pre-selected
@@ -117,9 +122,13 @@ uint8_t wichEntrance = 0;
 vec2 startPos = vec2(12,12);
 byte mapTimer = 10; // need?
 uint8_t lvlSettings=0;
-uint8_t bossesAlive = 0xFF;
+//uint8_t bossesAlive = 0xFF;
 bool bossRoom =false;
+
 uint8_t wingLvl=1;
+uint8_t jumpVelocity=30;
+uint8_t firePower =5;
+uint8_t heartsMax = 3; // (armor)
 
 void loadSetEEPROM()
 {

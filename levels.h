@@ -7,6 +7,7 @@
 //#include "Point.h"
 #include "player.h"
 
+#define NB_BOSS 2
 /*
 #define LSTART  0
 #define LFINISH 1 << 5
@@ -21,6 +22,48 @@
 // upper byte tile xxxx ____
 // LSB solid ____ ___x
 
+class BossLvl {
+  public:
+    uint8_t lvl;
+    bool alive;
+    uint8_t reward;
+    BossLvl(uint8_t l, uint8_t r){
+      lvl=l;
+      reward=r;
+      alive=true;
+    }
+};
+
+class BossLvl BossNumber1 = BossLvl(2,UPGRADE_FIRE);
+class BossLvl BossNumber2 = BossLvl(10,UPGRADE_JUMP);
+class BossLvl bossLevels[NB_BOSS]={BossNumber1,BossNumber2};
+//class BossLvl bossLevels[NB_BOSS]={BossLvl(2,UPGRADE_FIRE),BossLvl(10,UPGRADE_JUMP)};
+
+void BossLvlCheck(){
+  for (uint8_t i=0; i<NB_BOSS; i++){
+    if (bossLevels[i].lvl==level){
+      if (bossLevels[i].alive){
+        bossRoom = true;
+      }
+      else {
+        enemiesInit(false);
+      }
+      break;
+    }
+  }
+}
+
+uint8_t getBossReward(){
+  for (uint8_t i=0; i<NB_BOSS; i++){
+    if (bossLevels[i].lvl==level){
+      bossLevels[i].alive=false;
+      return (bossLevels[i].reward);
+    }
+    break;
+  }  
+  return 0;
+}
+
 
 // Cell based grid checking
 bool gridGetSolid(int8_t x, int8_t y) {
@@ -28,9 +71,10 @@ bool gridGetSolid(int8_t x, int8_t y) {
     return 1;
 
   if (y < 0 || y >= LEVEL_HEIGHT_CELLS)  //no more y limitation?
-    return 0;
+    return 1;
 
   const uint8_t *lvl = levels[level];
+  lvl++; //parameters read
   byte b = pgm_read_byte(lvl + (x >> 3) + (y * (LEVEL_WIDTH_CELLS >> 3)));
   return ((b >> (x % 8)) & 0x01);
 }
@@ -46,11 +90,19 @@ void levelLoad(const uint8_t *lvl) {
   clearExits();
   
   byte i = 0;
-  lvl += LEVEL_ARRAY_SIZE >> 3;
-  
   lvlSettings=pgm_read_byte(lvl);
+  switch((lvlSettings&0x70)>>4){
+    case 1:
+      level_width_cell = 8;
+      level_height_cell = 8;
+    break;
+    default:
+      level_width_cell = 24;
+      level_height_cell = 24;
+  }
+  lvl += 1 + (LEVEL_ARRAY_SIZE >> 3);
 
-  byte b = pgm_read_byte(lvl+++i);
+  byte b = pgm_read_byte(lvl+i);
   
   while (b != 0xFF)
   {
@@ -126,16 +178,16 @@ void levelLoad(const uint8_t *lvl) {
     kid.actualpos.y = levelExits[wichEntrance-1].pos.y<<5;
     startPos = kid.actualpos;
   }
-  uint8_t temp=(lvlSettings&0xF0)>>4;
-  if (temp!=0){
-    if (0!=(bossesAlive&(1<<(temp-1)))){
+  /*
+  if ((lvlSettings&0x80)==0x80){
+    if (BossLvlCheck()){ //check if there's an alive boss in this lvl
       bossRoom=true;
     }
     else {
       enemiesInit(false); //Clear Ennemies (not spikes)
     }
-  }
- 
+  }*/
+  BossLvlCheck();
 }
 
 void drawGrid() {
