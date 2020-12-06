@@ -36,7 +36,7 @@ bool gridGetSolid(int8_t x, int8_t y) {
 }
 
 void clearExits(){
-  for (uint8_t i=0;i<4;i++){
+  for (uint8_t i=0;i<MAX_DOORS;i++){
     levelExits[i].pos=vec2(-1,-1);
     levelExits[i].destination=19; //just checking....
   }
@@ -73,7 +73,7 @@ void levelLoad(const uint8_t *lvl) {
       case LFINISH:
         {
           // Finish
-          for (uint8_t j=0;j<4;j++){
+          for (uint8_t j=0;j<MAX_DOORS;j++){
             if (-1==levelExits[j].pos.x){
               levelExits[j].pos.x = x << 4;
               levelExits[j].pos.y = y << 4;
@@ -124,7 +124,18 @@ void levelLoad(const uint8_t *lvl) {
     //kid.actualpos = startPos;
     kid.actualpos.x = levelExits[wichEntrance-1].pos.x<<5;
     kid.actualpos.y = levelExits[wichEntrance-1].pos.y<<5;
+    startPos = kid.actualpos;
   }
+  uint8_t temp=(lvlSettings&0xF0)>>4;
+  if (temp!=0){
+    if (0!=(bossesAlive&(1<<(temp-1)))){
+      bossRoom=true;
+    }
+    else {
+      enemiesInit(false); //Clear Ennemies (not spikes)
+    }
+  }
+ 
 }
 
 void drawGrid() {
@@ -152,7 +163,7 @@ void drawGrid() {
 
   int commonx;
   int commony;
-  for (uint8_t i=0; i<4; i++){
+  for (uint8_t i=0; i<MAX_DOORS; i++){
     if (-1!=levelExits[i].pos.y){
       commonx = levelExits[i].pos.x - cam.pos.x;
       commony = levelExits[i].pos.y - cam.pos.y;
@@ -205,10 +216,10 @@ void checkCollisions()
   }
 
   // Level exit
-  for (uint8_t i=0; i<4 ; i++){
+  for (uint8_t i=0; i<MAX_DOORS ; i++){
     if (-1!=levelExits[i].pos.y){
       HighRect exitRect = {.x = levelExits[i].pos.x + 4, .y = levelExits[i].pos.y, .width = 8, .height = 16};
-      if (collide(exitRect, playerRect) && arduboy.justPressed(UP_BUTTON) )// && key.haveKey)
+      if ((collide(exitRect, playerRect) && arduboy.justPressed(UP_BUTTON) ) && false==bossRoom) //one does not simply leave the room whithout killing the Boss
       {
         balloonsLeft = kid.hearts;
         scoreIsVisible = true;        
@@ -244,7 +255,7 @@ void checkCollisions()
           HighRect projectileRect = {.x = kid.fireBalls[j].pos.x, .y = kid.fireBalls[j].pos.y, .width = 4, .height = 4};
           if (collide(projectileRect, ennemiRect))
           {
-            bats[i].HP-=15; //todo define dmg
+            bats[i].HP-=firePower; //todo define dmg
             kid.fireBalls[j].isActive=false;
             bats[i].hurt = true;
             /*if (bats[i].HP <= 0) {
@@ -259,7 +270,7 @@ void checkCollisions()
       if (collide(playerRect, ennemiRect) && bats[i].HP > 0 && !kid.isImune)
       {
         kidHurt();
-        kid.speed.y = PLAYER_JUMP_VELOCITY/2;
+        kid.speed.y = jumpVelocity/2;
         kid.speed.x = max(min((kid.pos.x - bats[i].pos.x - 2), 2), -2) << FIXED_POINT;
       }      
     }
@@ -272,7 +283,7 @@ void checkCollisions()
           HighRect projectileRect = {.x = kid.fireBalls[j].pos.x, .y = kid.fireBalls[j].pos.y, .width = 4, .height = 4};
           if (collide(projectileRect, ennemiRect))
           {
-            ghosts[i].HP-=15; //todo define dmg
+            ghosts[i].HP-=firePower; //todo define dmg
             kid.fireBalls[j].isActive=false;
             ghosts[i].hurt = true;
           }
@@ -284,7 +295,7 @@ void checkCollisions()
       if (collide(playerRect, ennemiRect) && ghosts[i].HP > 0 && !kid.isImune)
       {
         kidHurt();
-        kid.speed.y = PLAYER_JUMP_VELOCITY/2;
+        kid.speed.y = jumpVelocity/2;
         kid.speed.x = max(min((kid.pos.x - ghosts[i].pos.x - 2), 2), -2) << FIXED_POINT;
       }      
     }
@@ -293,7 +304,7 @@ void checkCollisions()
     if (!kid.isImune && bitRead(spikes[i].characteristics, 2) && collide(playerRect, spikes[i].pos))
     {
       kidHurt();
-      if (kid.pos.y < spikes[i].pos.y) kid.speed.y = PLAYER_JUMP_VELOCITY;
+      if (kid.pos.y < spikes[i].pos.y) kid.speed.y = jumpVelocity;
     }
   }
 }

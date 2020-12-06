@@ -9,6 +9,9 @@
 #include "elements.h"
 #include "levels.h"
 
+//lvl ups
+#define JUMPUP 1
+
 /*
 #define TOTAL_TONES 10
 PROGMEM const byte tones[] = {
@@ -52,12 +55,12 @@ void stateMenuPlayContinue()
 
 void stateGameNextLevel()
 {
-    scorePlayer=wichEntrance;
+    scorePlayer=bossesAlive;
   //if (level < TOTAL_LEVELS)
   //{
     if (arduboy.everyXFrames(20))
     {
-      canPressButton = false;
+      canPressButton = true;
       if (coinsCollected > 0)
       {
         coinsCollected--;
@@ -84,18 +87,13 @@ void stateGameNextLevel()
           gameState = STATE_GAME_OVER;
       }
     }
-  /*}
-  else
-  {
-    gameState = STATE_GAME_OVER;
-    return;
-  }*/
 
   // Update EEPROM
+  /*
   EEPROM.put(OFFSET_LEVEL, level);
   EEPROM.put(OFFSET_COINS, totalCoins);
   EEPROM.put(OFFSET_SCORE, scorePlayer);
-
+  */
 
   //if (nextLevelIsVisible)
   //{
@@ -106,9 +104,9 @@ void stateGameNextLevel()
   }
   else
   {
-    EEPROM.put(OFFSET_LEVEL, (byte)LEVEL_TO_START_WITH - 1);
+    //EEPROM.put(OFFSET_LEVEL, (byte)LEVEL_TO_START_WITH - 1);
     // Score remains after completing game? (no)
-    EEPROM.put(OFFSET_SCORE, (unsigned long)0);
+    //EEPROM.put(OFFSET_SCORE, (unsigned long)0);
   }
   drawNumbers(43, 49, FONT_BIG, DATA_SCORE);
   //}
@@ -169,6 +167,30 @@ void stateGamePause()
   {
     gameState = STATE_GAME_PLAYING;
   }
+}
+
+void stateGameLvlUp()
+{
+  uint8_t wichUp;  
+  uint8_t temp=(lvlSettings&0xf0)>>4;
+  bossesAlive&=~(1<<(temp-1));
+  switch (temp){
+    case 1:
+      wichUp=JUMPUP;
+      sprites.drawSelfMasked(30, 17, BadgeJump, 0);
+    break;
+  }
+  sprites.drawSelfMasked(60, 17, BadgeLevelUp, 0);
+  if (arduboy.justPressed(A_BUTTON | B_BUTTON))
+  {
+    switch (wichUp){
+      case JUMPUP:
+        jumpVelocity+=10;
+      break;
+    }    
+    bossRoom=false;
+    gameState = STATE_GAME_PLAYING;
+  }  
 }
 
 

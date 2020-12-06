@@ -86,6 +86,7 @@ void stateMenuHelp()
 
 void stateMenuInfo()
 {
+  /*
   sprites.drawSelfMasked(43, 2, badgeMysticBalloon, 0);
   sprites.drawSelfMasked(37, 0, stars, sparkleFrames);
   sprites.drawSelfMasked(40, 48, madeBy, 0);
@@ -104,7 +105,7 @@ void stateMenuInfo()
   {
     gameState = STATE_MENU_MAIN;
     //sound.tone(425, 20);
-  }
+  }*/
 }
 
 void stateMenuSoundfx()

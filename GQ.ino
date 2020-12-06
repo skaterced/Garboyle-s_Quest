@@ -41,6 +41,7 @@ const FunctionPointer PROGMEM  mainGameLoop[] = {
   stateGameNextLevel,
   stateGamePlaying,
   stateGamePause,
+  stateGameLvlUp,
   stateGameOver,
   stateMenuPlayContinue,
   stateMenuPlayNew,

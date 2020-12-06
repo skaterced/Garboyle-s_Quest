@@ -11,7 +11,7 @@
 #define PLAYER_SPEED_WALKING 1 << FIXED_POINT
 #define PLAYER_SPEED_AIR 2
 #define PLAYER_PARTICLES 3
-#define PLAYER_JUMP_VELOCITY (1 << FIXED_POINT) + 8
+//#define PLAYER_JUMP_VELOCITY 40
 #define GRAVITY 3
 #define FRICTION 1 // for horizontal speed
 #define MAX_XSPEED PLAYER_SPEED_WALKING
@@ -187,7 +187,7 @@ void checkKid()
       if (kid.isFlying)
       {
         kid.speed.y=0;
-        if (arduboy.everyXFrames(2)) //must depend on wings lvl
+        if (arduboy.everyXFrames(wingLvl))
           kid.wingsJauge -=1 ; 
         if (kid.wingsJauge<=0)
           kid.isFlying=false;

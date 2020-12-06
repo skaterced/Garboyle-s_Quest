@@ -38,8 +38,9 @@
 #define STATE_GAME_NEXT_LEVEL        6
 #define STATE_GAME_PLAYING           7
 #define STATE_GAME_PAUSE             8
-#define STATE_GAME_OVER              9
-#define STATE_GAME_PLAYCONTNEW       10 // 11
+#define STATE_GAME_LVLUP             9
+#define STATE_GAME_OVER              10
+#define STATE_GAME_PLAYCONTNEW       11 // 11
 
 #define FACING_RIGHT                 0
 #define FACING_LEFT                  1
@@ -58,7 +59,10 @@
 #define LEVEL_CELL_BYTES             (LEVEL_WIDTH_CELLS * LEVEL_HEIGHT_CELLS) >> 3
 #define LEVEL_ARRAY_SIZE             576
 
+#define MAX_DOORS                    7
+
 #define PLAYER_JUMP_TIME             11
+//#define PLAYER_JUMP_VELOCITY         30
 
 // This is a replacement for struct Rect in the Arduboy2 library.
 // It defines height as an int instead of a uint8_t to allow a higher rectangle.
@@ -87,6 +91,9 @@ Arduboy2Base arduboy;
 Sprites sprites;
 //ArduboyTones sound(arduboy.audio.enabled);
 
+uint8_t jumpVelocity=30;
+uint8_t firePower =5;
+
 byte gameState = STATE_MENU_MAIN;   // start the game with the TEAM a.r.g. logo
 byte menuSelection = STATE_MENU_PLAY; // PLAY menu item is pre-selected
 byte globalCounter = 0;
@@ -105,11 +112,14 @@ byte walkerFrame = 0;
 byte fanFrame = 0;
 byte coinFrame = 0;
 byte coinsActive = 0;
-Door levelExits [4];
+Door levelExits [MAX_DOORS];
 uint8_t wichEntrance = 0;
 vec2 startPos = vec2(12,12);
-byte mapTimer = 10;
+byte mapTimer = 10; // need?
 uint8_t lvlSettings=0;
+uint8_t bossesAlive = 0xFF;
+bool bossRoom =false;
+uint8_t wingLvl=1;
 
 void loadSetEEPROM()
 {

@@ -72,56 +72,48 @@ struct Spike
 
 Spike spikes[MAX_PER_TYPE];
 
-struct Fan
-{
-  vec2 pos;
-  vec2 particles[5];
-  int height;
-  bool active;
-  uint8_t dir;
-};
-
-//Fan fans[MAX_PER_TYPE];
-
-void enemiesInit()
+void enemiesInit(bool everything)
 {
   coinsActive = 0;
   //for (byte i = 0; i < MAX_PER_TYPE; ++i)
   for (byte i = MAX_PER_TYPE-1; i < MAX_PER_TYPE; --i)
   {
-    // Spikes
-    spikes[i].pos.x = 0;
-    spikes[i].pos.y = 0;
-    spikes[i].pos.width = 16;
-    spikes[i].pos.height = 16;
-    
-    spikes[i].characteristics = 1;
-    
+    if (everything){
+      // Spikes
+      spikes[i].pos.x = 0;
+      spikes[i].pos.y = 0;
+      spikes[i].pos.width = 16;
+      spikes[i].pos.height = 16;
+      
+      spikes[i].characteristics = 1;
+      
+      // Coins
+      coins[i].pos.x = 0;
+      coins[i].pos.y = 0;
+      coins[i].active = false;
+    }    
     // Bats
     bats[i].pos.x = 0;
     bats[i].pos.y = 0;
     bats[i].active = false;
-    bats[i].HP = 30;
+    bats[i].HP = 15;
     bats[i].direction = true;
     bats[i].hurt = false;
-
+  
     // Ghosts
     ghosts[i].pos.x = 0;
     ghosts[i].pos.y = 0;
     ghosts[i].speed.x = 0;
     ghosts[i].speed.y = 0;
     ghosts[i].active = false;
-    ghosts[i].HP = 45;
+    ghosts[i].HP = 50;
     ghosts[i].direction = true;
-    ghosts[i].hurt = false;    
-
-    // Coins
-    coins[i].pos.x = 0;
-    coins[i].pos.y = 0;
-    coins[i].active = false;
+    ghosts[i].hurt = false;       
   }
 }
-
+void enemiesInit(){
+  enemiesInit(true);
+}
 void coinsCreate(vec2 pos)
 {
   //for (byte i = 0; i < MAX_PER_TYPE; ++i)
@@ -184,15 +176,9 @@ void spikesCreate(vec2 pos, byte l)
       int len = 16 * (l + 1);
       spikes[i].pos.x = pos.x << 4;
       spikes[i].pos.y = pos.y << 4;
-      // Solid above
-      if (gridGetSolid(pos.x, pos.y - 1))
-      {
-        spikes[i].characteristics = B00000111;
-        spikes[i].pos.width = len;
-        spikes[i].pos.height = 8;
-      }
+      
       // Solid below
-      else if (gridGetSolid(pos.x, pos.y + 1))
+      if (gridGetSolid(pos.x, pos.y + 1))
       {
         spikes[i].characteristics = B00000101;
         spikes[i].pos.width = len;
@@ -213,6 +199,13 @@ void spikesCreate(vec2 pos, byte l)
         spikes[i].pos.width = 8;
         spikes[i].pos.height = len;
         spikes[i].pos.x += 8;
+      }
+      // Solid above
+      else if (gridGetSolid(pos.x, pos.y - 1))
+      {
+        spikes[i].characteristics = B00000111;
+        spikes[i].pos.width = len;
+        spikes[i].pos.height = 8;
       }
       return;
     }
@@ -235,8 +228,8 @@ void enemiesUpdate()
     arduboy.fillCircle(commonx, commony, 4);
   }
 
-  // Draw spikes first
-  //for (byte i = 0; i < MAX_PER_TYPE; ++i)
+  uint8_t ennemiesLeft=0;
+  // Draw spikes first  
   for (byte i = MAX_PER_TYPE-1; i < MAX_PER_TYPE; --i)
   {
     if (bitRead(spikes[i].characteristics, 2)) // spike active
@@ -262,7 +255,8 @@ void enemiesUpdate()
 
     // Bats
     if (bats[i].active)
-    {      
+    {
+      ennemiesLeft++;
       if (arduboy.everyXFrames(2) && bats[i].HP > 0 )
       {
         if (!gridGetSolid((bats[i].pos.x + (bats[i].direction? 9:0)) >> 4, bats[i].pos.y >> 4))
@@ -276,7 +270,7 @@ void enemiesUpdate()
         }
       }
 
-      if (bats[i].HP>0){
+      if (bats[i].HP>0){        
         sprites.drawSelfMasked(bats[i].pos.x - cam.pos.x, bats[i].pos.y - cam.pos.y, BatSprite, walkerFrame + (bats[i].HP <= 0) * 2);
         // Bat's eyes
         arduboy.drawPixel(bats[i].pos.x - cam.pos.x + (bats[i].direction? 4:3), bats[i].pos.y - cam.pos.y+3,0);
@@ -295,8 +289,14 @@ void enemiesUpdate()
     // Ghosts
     //25746 - 25758
     if (ghosts[i].active)
-    {      
-      if (((0x04==(globalCounter&0x07))||(0x10==(globalCounter&0x31))||(0x17==(globalCounter&0x3F))) && (0x40!=(globalCounter&0x60)) && ghosts[i].HP > 0 ){
+    {
+      ennemiesLeft++;
+      HighRect ennemiRect = {.x = ghosts[i].pos.x, .y = ghosts[i].pos.y, .width = 100, .height = 60};
+      HighRect kidPoint = {.x=kid.pos.x, .y=kid.pos.y, .width=100,.height=60}; 
+      if (collide(kidPoint,ennemiRect) && ghosts[i].HP > 0){
+        //23716 - 23722
+        if (((0x04==(globalCounter&0x07))||(0x10==(globalCounter&0x31))||(0x17==(globalCounter&0x3F))) && (0x40!=(globalCounter&0x60))  ){
+        //if (arduboy.everyXFrames(5-((globalCounter&0x30)>>4))){
           ghosts[i].direction = ghosts[i].pos.x<kid.pos.x;
           if ((kid.pos.x-ghosts[i].pos.x)>2){
             ghosts[i].pos.x++;
@@ -310,6 +310,7 @@ void enemiesUpdate()
           else if ((ghosts[i].pos.y-kid.pos.y)>2){
             ghosts[i].pos.y--;
           }
+        }
       }
       arduboy.fillRect(ghosts[i].pos.x - cam.pos.x + 1 , ghosts[i].pos.y - cam.pos.y + 3, 10, 7, 0);
       if (ghosts[i].HP>0){        
@@ -330,6 +331,10 @@ void enemiesUpdate()
     {
       sprites.drawOverwrite(coins[i].pos.x - cam.pos.x, coins[i].pos.y - cam.pos.y, elements, 0);
     }
+  }
+  if (bossRoom&&(0==ennemiesLeft)){
+    //LvlUp
+    gameState=STATE_GAME_LVLUP;
   }
 }
 

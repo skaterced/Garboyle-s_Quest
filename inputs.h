@@ -99,7 +99,7 @@ void checkInputs()
       kid.jumpLetGo = false;
       kid.isClimbing = false;
       kid.jumpTimer = PLAYER_JUMP_TIME;
-      kid.speed.y = PLAYER_JUMP_VELOCITY;
+      kid.speed.y = jumpVelocity;
       if (arduboy.pressed(RIGHT_BUTTON)) kid.speed.x = MAX_XSPEED;
       else if (arduboy.pressed(LEFT_BUTTON)) kid.speed.x = -MAX_XSPEED;
     }
