@@ -27,7 +27,7 @@ void checkInputs()
   {
     cam.offset.y = CAMERA_OFFSET;
   }
-  if (!(kid.isSucking||kid.isClimbing)) 
+  if (!(kid.isFiring||kid.isClimbing)) 
   {
     if (arduboy.pressed(LEFT_BUTTON))
     {
@@ -68,7 +68,7 @@ void checkInputs()
       }
     }
   }
-  kid.isSucking = false;
+  kid.isFiring = false;
   if (arduboy.pressed(A_BUTTON))
   {
     if (arduboy.pressed(DOWN_BUTTON))
@@ -77,21 +77,21 @@ void checkInputs()
     {
       //kid.isFlying = false;
       kid.fire();
-      kid.isSucking = true;
+      kid.isFiring = true;
     }
   }
   /*if (arduboy.pressed(A_BUTTON + DOWN_BUTTON))  gameState = STATE_GAME_PAUSE;
   if (arduboy.pressed(A_BUTTON) && !kid.isFlying)
   {
-    kid.isSucking = true;
+    kid.isFiring = true;
   }
   else
-    kid.isSucking = false;*/
+    kid.isFiring = false;*/
 
   // Jump Button
-  if (arduboy.justPressed(B_BUTTON))
+  if (arduboy.justPressed(B_BUTTON)) //todo: check if climbing -> jump against the wall
   {
-    if (kid.speed.y == 0 && kid.isJumping == false && kid.isLanding == false)
+    if ((kid.speed.y == 0 && kid.isJumping == false && kid.isLanding == false)||kid.isClimbing)
     {
       //sound.tone(200, 100);
       kid.isWalking = false;

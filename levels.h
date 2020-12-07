@@ -59,7 +59,6 @@ uint8_t getBossReward(){
       bossLevels[i].alive=false;
       return (bossLevels[i].reward);
     }
-    break;
   }  
   return 0;
 }
@@ -367,7 +366,7 @@ void drawHUD()
 
   arduboy.fillRect(0,0,7,64,1);
   arduboy.drawLine(1,62,1,2+60-kid.wingsJauge,0);
-  // drawNumbers(91, 0, FONT_SMALL, DATA_SCORE); //for test
+  //drawNumbers(91, 0, FONT_SMALL, DATA_SCORE); //for test
   drawLives();
 }
 #endif
