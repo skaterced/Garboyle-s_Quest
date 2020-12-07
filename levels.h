@@ -34,10 +34,7 @@ class BossLvl {
     }
 };
 
-class BossLvl BossNumber1 = BossLvl(2,UPGRADE_FIRE);
-class BossLvl BossNumber2 = BossLvl(10,UPGRADE_JUMP);
-class BossLvl bossLevels[NB_BOSS]={BossNumber1,BossNumber2};
-//class BossLvl bossLevels[NB_BOSS]={BossLvl(2,UPGRADE_FIRE),BossLvl(10,UPGRADE_JUMP)};
+class BossLvl bossLevels[NB_BOSS]={BossLvl(3,UPGRADE_FIRE),BossLvl(2,UPGRADE_JUMP)};
 
 void BossLvlCheck(){
   for (uint8_t i=0; i<NB_BOSS; i++){
@@ -70,7 +67,7 @@ bool gridGetSolid(int8_t x, int8_t y) {
     return 1;
 
   if (y < 0 || y >= LEVEL_HEIGHT_CELLS)  //no more y limitation?
-    return 1;
+    return indorLevel;
 
   const uint8_t *lvl = levels[level];
   lvl++; //parameters read
@@ -90,6 +87,7 @@ void levelLoad(const uint8_t *lvl) {
   
   byte i = 0;
   lvlSettings=pgm_read_byte(lvl);
+  indorLevel=true; //most of them will be I guess
   switch((lvlSettings&0x70)>>4){
     case 1:
       level_width_cell = 8;
@@ -98,6 +96,7 @@ void levelLoad(const uint8_t *lvl) {
     default:
       level_width_cell = 24;
       level_height_cell = 24;
+      indorLevel=false;
   }
   lvl += 1 + (LEVEL_ARRAY_SIZE >> 3);
 

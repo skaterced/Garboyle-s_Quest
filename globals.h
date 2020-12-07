@@ -66,6 +66,7 @@
 #define UPGRADE_WINGS  0x04
 #define UPGRADE_ARMOR  0x08
 
+#define IMUNE_TIME 80
 #define PLAYER_JUMP_TIME             11
 //#define PLAYER_JUMP_VELOCITY         30
 
@@ -122,6 +123,7 @@ uint8_t wichEntrance = 0;
 vec2 startPos = vec2(12,12);
 byte mapTimer = 10; // need?
 uint8_t lvlSettings=0;
+bool indorLevel=false;
 //uint8_t bossesAlive = 0xFF;
 bool bossRoom =false;
 

@@ -125,7 +125,7 @@ void checkKid()
   {
     if (arduboy.everyXFrames(2)) kid.isActive = !kid.isActive;
     kid.imuneTimer++;
-    if (kid.imuneTimer > 60)
+    if (kid.imuneTimer > IMUNE_TIME)
     {
       kid.imuneTimer = 0;
       kid.isImune = false;
@@ -295,7 +295,7 @@ void checkKid()
           kid.isFlying = false;
           kid.jumpLetGo = false;
           //kid.actualpos.y = ((kid.pos.y + 8) >> 4) << (FIXED_POINT + 4); //snap to grid
-          if (0x02==lvlSettings&0x0f){
+          if (0x04==lvlSettings&0x0f){ //slippery tile
             kid.speed.y = -8;
           }
           else
