@@ -54,6 +54,7 @@ struct Players
     byte shootingTimer;
     byte frame;
     byte hearts;
+    uint8_t lives;
     byte wingsJauge;
     //byte balloonOffset;
     vec2 particles[PLAYER_PARTICLES];
@@ -77,12 +78,23 @@ struct Players
         }
       }
     }
+    
 };
 
 //Sketch uses 26254 bytes (91%) of program storage space. Maximum is 28672 bytes
 
 Players kid;
 Camera cam;
+
+void initKid(void){
+  bossRoom=false;
+  kid.hearts = 3;
+  kid.lives =3;
+  wingLvl=1;
+  jumpVelocity=30;
+  firePower =5;
+  heartsMax = 3; // (armor)
+}
 
 void setKid()
 {
@@ -93,7 +105,7 @@ void setKid()
   kid.speed.x = 0;
   kid.speed.y = 0;
   kid.isActive = true;
-  kid.isImune = true;
+  //kid.isImune = true;
   kid.imuneTimer = 0;
   kid.jumpTimer = 0;
   kid.shootingTimer = 0;
@@ -107,12 +119,9 @@ void setKid()
   kid.isClimbing = false;
   kid.againstWall = false;
   kid.wingsJauge = 60;
-  #ifndef HARD_MODE
-  kid.hearts = 3;
-  #endif
 //  kid.balloonOffset = 0;
-  for (byte i = 0; i < PLAYER_PARTICLES; ++i)
-    kid.particles[i] = vec2(random(16), random(16));
+  /*for (byte i = 0; i < PLAYER_PARTICLES; ++i)
+    kid.particles[i] = vec2(random(16), random(16));*/
   for (byte i = 0; i < MAX_WEAPON; i++)
     kid.fireBalls[i].isActive=false;
 }
@@ -217,21 +226,6 @@ void checkKid()
     int8_t ysnap = (((kid.actualpos.y >> FIXED_POINT) + 12) >> 4);
     //if (!gridGetSolid(ysnap, kid.pos.x >> 4))
     kid.actualpos.y = ysnap << (FIXED_POINT + 4);
-
-    // Fall off edge
-    /*
-    //if (abs(((kid.pos.x + 6) % 16) - 8) >= 4)
-    //if (!arduboy.pressed(RIGHT_BUTTON) && !arduboy.pressed(LEFT_BUTTON))
-    if (!arduboy.pressed(RIGHT_BUTTON | LEFT_BUTTON))
-    {
-      int yy = (kid.pos.y + 16) >> 4;
-      bool sl = gridGetSolid((kid.pos.x + 4) >> 4, yy);
-      bool sr = gridGetSolid((kid.pos.x + 8) >> 4, yy);
-      if (!sl & gridGetSolid((kid.pos.x + 11) >> 4, yy))
-        kid.actualpos.x -= FIXED_POINT << 2;
-      else if (!sr && gridGetSolid((kid.pos.x) >> 4, yy))
-        kid.actualpos.x += FIXED_POINT << 2;
-    }*/
   }
   else
   {
@@ -363,7 +357,12 @@ void drawKid()
       if (kid.hearts == 0)
       {
         // dead
-        gameState = STATE_GAME_OVER;
+        setKid();
+        kid.hearts=heartsMax;
+        kid.isImune = true;
+        kid.actualpos = startPos;
+        if (--kid.lives==0)
+          gameState = STATE_GAME_OVER;
       }
       //--kid.hearts;
     }
@@ -405,6 +404,5 @@ void drawKid()
     }
   }
 }
-
 
 #endif

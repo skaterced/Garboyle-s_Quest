@@ -303,7 +303,7 @@ void checkCollisions()
       HighRect coinrect = {.x = coins[i].pos.x, .y = coins[i].pos.y, .width = 10, .height = 12};
       if (collide(playerRect, coinrect))
       {
-        if (kid.hearts<3){ //todo changeable hearts max
+        if (kid.hearts<3){
           coins[i].active=false;
           kid.hearts++;
         }

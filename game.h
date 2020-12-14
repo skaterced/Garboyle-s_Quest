@@ -26,7 +26,7 @@ void stateMenuPlayNew()
   balloonsLeft = 0;
   scorePlayer = 0;
   globalCounter = 0;
-  kid.hearts = 3;
+  initKid();
   gameState = STATE_GAME_NEXT_LEVEL;
   scoreIsVisible = false;
   nextLevelIsVisible = true;
@@ -42,7 +42,7 @@ void stateMenuPlayContinue()
   //scorePlayer = 0;
   EEPROM.get(OFFSET_SCORE, scorePlayer);
   globalCounter = 0;
-  kid.hearts = 3;
+  initKid();
   gameState = STATE_GAME_NEXT_LEVEL;
   scoreIsVisible = false;
   nextLevelIsVisible = true;
@@ -232,16 +232,17 @@ void stateGameOver()
   }
   sprites.drawSelfMasked(x, 17, badgeGameOver, 0);
   drawNumbers(43, 49, FONT_BIG, DATA_SCORE);
-
+  /*
   unsigned long highscore = 0;
   EEPROM.get(OFFSET_HSCORE, highscore);
   if (scorePlayer > highscore) {
     EEPROM.put(OFFSET_COINSHS, totalCoins);
     EEPROM.put(OFFSET_HSCORE, scorePlayer);
   }
-    
+    */
   if (arduboy.justPressed(A_BUTTON | B_BUTTON))
   {
+    bossRoom=false;
     gameState = STATE_MENU_MAIN;
   }
 }

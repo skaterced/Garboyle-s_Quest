@@ -18,6 +18,10 @@ void drawLives()
   {
     sprites.drawErase(3,(i * 5)+3, hearts, 0);
   }
+  for (byte i = 0; i < kid.lives; ++i)
+  {
+    arduboy.drawCircle(4,(i * (-5))+61, 1, 0);
+  }
 }
 
 void drawCoinHUD()
