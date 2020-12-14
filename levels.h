@@ -7,7 +7,7 @@
 //#include "Point.h"
 #include "player.h"
 
-#define NB_BOSS 2
+#define NB_BOSS 3 //the last one is reserved for the cheat
 /*
 #define LSTART  0
 #define LFINISH 1 << 5
@@ -34,7 +34,7 @@ class BossLvl {
     }
 };
 
-class BossLvl bossLevels[NB_BOSS]={BossLvl(3,UPGRADE_FIRE),BossLvl(2,UPGRADE_JUMP)};
+class BossLvl bossLevels[NB_BOSS]={BossLvl(3,UPGRADE_FIRE),BossLvl(2,UPGRADE_JUMP),BossLvl(99,0)};
 
 void BossLvlCheck(){
   for (uint8_t i=0; i<NB_BOSS; i++){
@@ -92,6 +92,19 @@ void levelLoad(const uint8_t *lvl) {
     case 1:
       level_width_cell = 8;
       level_height_cell = 8;
+    break;
+    case 2:
+      level_width_cell = 16;
+      level_height_cell = 16;
+    break;
+    case 3:
+      level_width_cell = 32;
+      level_height_cell = 16;
+      indorLevel=false;
+    break;
+    case 4:
+      level_width_cell = 8;
+      level_height_cell = 32;
     break;
     default:
       level_width_cell = 24;

@@ -160,7 +160,22 @@ void stateGamePlaying()
 void stateGamePause()
 {
   sprites.drawSelfMasked(47, 17, badgePause, 0);
-  if (arduboy.justPressed(A_BUTTON | B_BUTTON))
+  //bossLevels[NB_BOSS]
+  if (arduboy.justPressed(B_BUTTON)){
+    if (arduboy.pressed(LEFT_BUTTON)){ //cheat
+      bossLevels[NB_BOSS-1].alive=true;
+      bossLevels[NB_BOSS-1].lvl=level;
+      bossLevels[NB_BOSS-1].reward=UPGRADE_JUMP;
+      gameState = STATE_GAME_LVLUP;
+    }
+    else if (arduboy.pressed(RIGHT_BUTTON)){ //cheat
+      bossLevels[NB_BOSS-1].alive=true;
+      bossLevels[NB_BOSS-1].lvl=level;
+      bossLevels[NB_BOSS-1].reward=UPGRADE_WINGS;
+      gameState = STATE_GAME_LVLUP;
+    }
+  }
+  else if (arduboy.justPressed(A_BUTTON | B_BUTTON))
   {
     gameState = STATE_GAME_PLAYING;
   }
@@ -174,13 +189,13 @@ void stateGameLvlUp()
       sprites.drawSelfMasked(30, 17, BadgeJump, 0);
     break;
     case UPGRADE_FIRE:
-      sprites.drawSelfMasked(30, 17, BadgeFire, 0);
+      sprites.drawSelfMasked(32, 17, BadgeFire, 0);
     break;
     case UPGRADE_WINGS:
-      sprites.drawSelfMasked(30, 17, BadgeWings, 0);
+      sprites.drawSelfMasked(26, 17, BadgeWings, 0);
     break;
     case UPGRADE_ARMOR:
-      sprites.drawSelfMasked(30, 17, BadgeArmor, 0);
+      sprites.drawSelfMasked(25, 17, BadgeArmor, 0);
     break;
   }
   sprites.drawSelfMasked(60, 17, BadgeLevelUp, 0);

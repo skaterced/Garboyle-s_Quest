@@ -48,6 +48,7 @@ struct Players
     boolean jumpLetGo;
     boolean isFiring;
     boolean isClimbing;
+    boolean againstWall;
     byte imuneTimer;
     byte jumpTimer;
     byte shootingTimer;
@@ -104,6 +105,7 @@ void setKid()
   kid.jumpLetGo = true;
   kid.isFiring = false;
   kid.isClimbing = false;
+  kid.againstWall = false;
   kid.wingsJauge = 60;
   #ifndef HARD_MODE
   kid.hearts = 3;
@@ -281,13 +283,13 @@ void checkKid()
     {
       kid.actualpos.x += kid.speed.x;
     }
-    else
+    else if (kid.hearts>0)
     {      
       kid.direction=(kid.speed.x<0); //because of the inertia
       kid.speed.x = 0;
       kid.actualpos.x = ((((kid.pos.x + 6) >> 4) << 4) + ((!kid.direction) * 4)) << (FIXED_POINT);      
       if ( gridGetSolid(tx2, (kid.pos.y + 7) >> 4)&&(arduboy.pressed(RIGHT_BUTTON)||arduboy.pressed(LEFT_BUTTON))){ //shorter region         
-        if (!arduboy.pressed(DOWN_BUTTON)&&(!kid.isWalking)){   //stick to the wall          
+        if (!arduboy.pressed(DOWN_BUTTON)&&(!kid.isWalking)&&(!kid.againstWall)){   //stick to the wall          
           kid.isClimbing=true;
           kid.wingsJauge = 60;
           kid.isJumping = false;
@@ -295,12 +297,12 @@ void checkKid()
           kid.isFlying = false;
           kid.jumpLetGo = false;
           //kid.actualpos.y = ((kid.pos.y + 8) >> 4) << (FIXED_POINT + 4); //snap to grid
-          if (0x04==lvlSettings&0x0f){ //slippery tile
+          if (0x04==(lvlSettings&0x0f)){ //slippery tile
             kid.speed.y = -8;
           }
           else
             kid.speed.y = 0;
-        }        
+        }       
       }
     }
   }
@@ -334,7 +336,8 @@ void updateCamera()
   V = V >> 2;
 
   cam.pos += V;
-  cam.pos.y = min(320, cam.pos.y);
+  //cam.pos.y = min(464, cam.pos.y); //320 for 24x24
+  cam.pos.y = min(indorLevel? 464:320, cam.pos.y);
 }
 
 void drawKid()
@@ -347,6 +350,11 @@ void drawKid()
     vec2 kidcam;
     kidcam.x = kid.pos.x - cam.pos.x;
     kidcam.y = kid.pos.y - cam.pos.y;
+/*
+    if (kid.againstWall){ //                      //test
+      arduboy.fillCircle(kidcam.x,kidcam.y,5);
+    }
+*/    
     // Fall off earth
     if (kidcam.y > 64 + (CAMERA_OFFSET * 3))
     {
@@ -380,7 +388,8 @@ void drawKid()
         sprites.drawSelfMasked(kidcam.x, kidcam.y, kidSprite, kid.frame + 7 * kid.direction + ((kid.isJumping << 2) + 5 * (kid.isLanding || kid.isFlying)) * !kid.isFiring + kid.isClimbing*6 );      
       }
       else {
-        sprites.drawOverwrite(kidcam.x, kidcam.y, kidSprite, kid.frame + 7 * kid.direction );      
+        sprites.drawErase(kidcam.x, kidcam.y, kidSprite, 14 + kid.direction );      
+        sprites.drawSelfMasked(kidcam.x, kidcam.y, kidSprite, kid.frame + 7 * kid.direction );      
       }
     }
 
