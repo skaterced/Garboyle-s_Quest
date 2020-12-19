@@ -52,6 +52,8 @@ void stateMenuPlayContinue()
 
 void stateGameNextLevel()
 {
+
+  /*
     scorePlayer=0; //bossesAlive;
   //if (level < TOTAL_LEVELS)
   //{
@@ -75,22 +77,22 @@ void stateGameNextLevel()
         canPressButton = true;
         scoreIsVisible = false;
         pressKeyIsVisible = !pressKeyIsVisible;
-        /*if (toneindex < TOTAL_TONES)
+        if (toneindex < TOTAL_TONES)
         {
           sound.tone(pgm_read_byte(tones + toneindex++), 200);
           toneindex = TOTAL_TONES;
-        }*/
+        }
         if (level >= TOTAL_LEVELS)
           gameState = STATE_GAME_OVER;
       }
     }
 
   // Update EEPROM
-  /*
+  
   EEPROM.put(OFFSET_LEVEL, level);
   EEPROM.put(OFFSET_COINS, totalCoins);
   EEPROM.put(OFFSET_SCORE, scorePlayer);
-  */
+  
 
   //if (nextLevelIsVisible)
   //{
@@ -117,25 +119,18 @@ void stateGameNextLevel()
       if (i < coinsCollected) sprites.drawOverwrite(65 - (7 * totalBadges) + (i * 14), 27, badgeElements, 0);
       else sprites.drawOverwrite(65 - (7 * totalBadges) + (i * 14), 27, badgeElements, 1);
     }
-  }
+  }*/
 
-  if (canPressButton)
-  {
 
-    if (pressKeyIsVisible) sprites.drawOverwrite(38, 29, badgePressKey, 0);
-    if (arduboy.justPressed(A_BUTTON | B_BUTTON))
-    {
-      //toneindex = 0;
-      //sound.tone(425, 20);
-      setKid();
-      //cam.pos = vec2(0, 0);
-      cam.pos = vec2(0, LEVEL_HEIGHT - 64);
-      cam.offset = vec2(0, 0);
-      enemiesInit();
-      levelLoad(levels[level]);
-      gameState = STATE_GAME_PLAYING;
-    }
-  }
+  //toneindex = 0;
+  //sound.tone(425, 20);
+  setKid();
+  //cam.pos = vec2(0, 0);
+  cam.pos = vec2(0, LEVEL_HEIGHT - 64);
+  cam.offset = vec2(0, 0);
+  enemiesInit();
+  levelLoad(levels[level]);
+  gameState = STATE_GAME_PLAYING;
 };
 
 

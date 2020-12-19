@@ -1,6 +1,7 @@
 /*
   
-  Garboyle's Quest. Made from Mystic Ballon (see under) and inspired by CAPCOM "Gargoyle's Quest"
+  Garboyle's Quest 
+    Made from Mystic Ballon (see under) and inspired by CAPCOM "Gargoyle's Quest"
 
   
   

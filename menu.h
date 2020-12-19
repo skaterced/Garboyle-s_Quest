@@ -54,6 +54,9 @@ void stateMenuMain()
 {
 
   drawTitleScreen();
+  if (arduboy.justPressed(A_BUTTON | B_BUTTON))
+    gameState=STATE_GAME_PLAYCONTNEW;
+  /*
   sprites.drawOverwrite(101, 9, mainMenu, 0);
   if (arduboy.justPressed(DOWN_BUTTON) && (menuSelection < 5))
   {
@@ -71,6 +74,7 @@ void stateMenuMain()
     //sound.tone(425, 20);
   }
   sprites.drawPlusMask(96, 9 + 9 * (menuSelection - 2), selector_plus_mask, 0);
+  */
 }
 
 void stateMenuHelp()

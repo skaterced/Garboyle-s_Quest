@@ -40,8 +40,10 @@ struct Weapon
     {
       if (isActive)
       {
-        arduboy.drawCircle(pos.x-cam.x,pos.y-cam.y,3);
-        arduboy.drawCircle(pos.x-cam.x,pos.y-cam.y,2,(globalCounter&0x02)>>1);
+        uint8_t radius = firePower/5;
+        arduboy.drawCircle(pos.x-cam.x,pos.y-cam.y,radius++,(globalCounter&0x02)>>1);
+        arduboy.drawCircle(pos.x-cam.x,pos.y-cam.y,radius++,(globalCounter&0x02)>>1);
+        arduboy.drawCircle(pos.x-cam.x,pos.y-cam.y,radius);
       }
     }
     

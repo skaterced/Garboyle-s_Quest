@@ -315,7 +315,7 @@ void checkCollisions()
       HighRect ennemiRect = {.x = bats[i].pos.x, .y = bats[i].pos.y, .width = 10, .height = 8};
       for (uint8_t j=0; j<MAX_WEAPON; j++){
         if (kid.fireBalls[j].isActive){
-          HighRect projectileRect = {.x = kid.fireBalls[j].pos.x, .y = kid.fireBalls[j].pos.y, .width = 4, .height = 4};
+          HighRect projectileRect = {.x = kid.fireBalls[j].pos.x, .y = kid.fireBalls[j].pos.y, .width = 3+(firePower/5), .height = 3+(firePower/5)};
           if (collide(projectileRect, ennemiRect))
           {
             bats[i].HP-=firePower; //todo define dmg
@@ -343,7 +343,7 @@ void checkCollisions()
       HighRect ennemiRect = {.x = ghosts[i].pos.x, .y = ghosts[i].pos.y, .width = 12, .height = 16};
       for (uint8_t j=0; j<MAX_WEAPON; j++){
         if (kid.fireBalls[j].isActive){
-          HighRect projectileRect = {.x = kid.fireBalls[j].pos.x, .y = kid.fireBalls[j].pos.y, .width = 4, .height = 4};
+          HighRect projectileRect = {.x = kid.fireBalls[j].pos.x, .y = kid.fireBalls[j].pos.y, .width = 3+(firePower/5), .height = 3+(firePower/5)};
           if (collide(projectileRect, ennemiRect))
           {
             ghosts[i].HP-=firePower; //todo define dmg
