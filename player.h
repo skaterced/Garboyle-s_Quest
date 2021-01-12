@@ -63,13 +63,11 @@ struct Players
       for (uint8_t i=0; i<MAX_WEAPON; i++){
         if ((!fireBalls[i].isActive)&&(0==shootingTimer)){
           fireBalls[i].isActive=true;
-          //fireBalls[i].pos.x=pos.x+4;
-          fireBalls[i].pos.y=pos.y+4;
-          fireBalls[i].actualpos.x=actualpos.x+64;
-          //fireBalls[i].actualpos.y=actualpos.y;
-          //fireBalls[i].direction=direction; //need?
+          fireBalls[i].radius = firePower;
+          fireBalls[i].pos.y=pos.y+4;          
           bool dir = direction;
           if (isClimbing) dir=!dir ;
+          fireBalls[i].actualpos.x=actualpos.x+64+(dir? 0:64);
           fireBalls[i].speed.x= (dir? -1:1)*WEAPON_SPEED;
           //fireBalls[i].speed.y=0;
           shootingTimer=SHOOT_TIMER_INIT;
@@ -92,7 +90,7 @@ void initKid(void){
   kid.lives =3;
   wingLvl=1;
   jumpVelocity=30;
-  firePower =5;
+  firePower = 1;
   heartsMax = 3; // (armor)
 }
 

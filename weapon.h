@@ -31,7 +31,7 @@ struct Weapon
     boolean isActive;
     boolean direction; //need?
     byte timer;
-    byte type;
+    uint8_t radius;
 
     //byte balloonOffset;
 //    vec2 particles[PLAYER_PARTICLES];
@@ -40,10 +40,9 @@ struct Weapon
     {
       if (isActive)
       {
-        uint8_t radius = firePower/5;
-        arduboy.drawCircle(pos.x-cam.x,pos.y-cam.y,radius++,(globalCounter&0x02)>>1);
-        arduboy.drawCircle(pos.x-cam.x,pos.y-cam.y,radius++,(globalCounter&0x02)>>1);
-        arduboy.drawCircle(pos.x-cam.x,pos.y-cam.y,radius);
+        for (uint8_t i=radius+2; i>1; i--){
+          arduboy.drawCircle(pos.x-cam.x,pos.y-cam.y,i,(((2+radius)==i)||((globalCounter&0x02)>>1)));
+        }
       }
     }
     

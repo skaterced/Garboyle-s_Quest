@@ -154,6 +154,7 @@ void stateGamePlaying()
 
 void stateGamePause()
 {
+  drawKid();
   sprites.drawSelfMasked(47, 17, badgePause, 0);
   //bossLevels[NB_BOSS]
   if (arduboy.justPressed(B_BUTTON)){
@@ -169,6 +170,12 @@ void stateGamePause()
       bossLevels[NB_BOSS-1].reward=UPGRADE_WINGS;
       gameState = STATE_GAME_LVLUP;
     }
+    else if (arduboy.pressed(DOWN_BUTTON)){ //cheat
+      bossLevels[NB_BOSS-1].alive=true;
+      bossLevels[NB_BOSS-1].lvl=level;
+      bossLevels[NB_BOSS-1].reward=UPGRADE_FIRE;
+      gameState = STATE_GAME_LVLUP;
+    }
   }
   else if (arduboy.justPressed(A_BUTTON | B_BUTTON))
   {
@@ -178,30 +185,31 @@ void stateGamePause()
 
 void stateGameLvlUp()
 {
-  uint8_t wichUp=getBossReward();
+  uint8_t wichUp=getBossReward(false);
   switch (wichUp){
     case UPGRADE_JUMP:
-      sprites.drawSelfMasked(30, 17, BadgeJump, 0);
+      sprites.drawSelfMasked(30, 12, BadgeJump, 0);
     break;
     case UPGRADE_FIRE:
-      sprites.drawSelfMasked(32, 17, BadgeFire, 0);
+      sprites.drawSelfMasked(32, 12, BadgeFire, 0);
     break;
     case UPGRADE_WINGS:
-      sprites.drawSelfMasked(26, 17, BadgeWings, 0);
+      sprites.drawSelfMasked(26, 12, BadgeWings, 0);
     break;
     case UPGRADE_ARMOR:
-      sprites.drawSelfMasked(25, 17, BadgeArmor, 0);
+      sprites.drawSelfMasked(20, 12, BadgeArmor, 0);
     break;
   }
-  sprites.drawSelfMasked(60, 17, BadgeLevelUp, 0);
+  drawKid();
+  sprites.drawSelfMasked(60, 12, BadgeLevelUp, 0);  
   if (arduboy.justPressed(A_BUTTON | B_BUTTON))
-  {
+  {    
     switch (wichUp){
       case UPGRADE_JUMP:
         jumpVelocity+=10;
       break;
       case UPGRADE_FIRE:
-        firePower+=5;
+        firePower++;
       break;
       case UPGRADE_WINGS:
         wingLvl++;
@@ -209,11 +217,14 @@ void stateGameLvlUp()
       case UPGRADE_ARMOR:
         heartsMax++;
       break;
-    }    
+    }
+    
     bossRoom=false;
     kid.hearts=heartsMax;
-    gameState = STATE_GAME_PLAYING;
-  }  
+    if (0==getBossReward(true)){
+      gameState = STATE_GAME_PLAYING;
+    }
+  }
 }
 
 

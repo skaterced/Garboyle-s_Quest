@@ -3,6 +3,8 @@
 
 #include <Arduino.h>
 #include "globals.h"
+#include "weapon.h"
+#include "player.h" //for the camera
 //#include "vec2.h"
 
 #define MAX_FAN_PARTICLES 4
@@ -19,6 +21,8 @@
 #define MAX_ENNEMI_SPEED_X 1<<5
 #define MAX_ENNEMI_SPEED_Y 1<<5
 #define GHOST_ACC 1
+
+Weapon ennemiBullets[MAX_PER_TYPE];
 
 struct Coin
 {
@@ -52,13 +56,30 @@ struct Ghost
 {
   vec2 pos;
   vec2 speed;
-  bool direction; //true if heading right  
+  bool direction; //true if heading right 
+  bool canShoot;
   int8_t HP;
   bool hurt;
   bool active;
 };
 
 Ghost ghosts[MAX_PER_TYPE];
+
+struct Sun
+{
+  vec2 pos;
+  //vec2 speed;
+  uint8_t direction; //0 is north then clockwise
+  bool clockwise;
+  int8_t HP;
+  bool hurt;
+  bool active;
+};
+
+Sun sun; //there could only be one per level.
+
+//vec2 circleMove[8]={vec2(0,-2),vec2(1,-1),vec2(2,0),vec2(1,1),vec2(0,2),vec2(-1,1),vec2(-2,0),vec2(-1,-1)};
+int8_t circleMove[16]={0,1,2,3,3,3,2,1,0,-1,-2,-3,-3,-3,-2,-1};
 
 struct Spike
 {
@@ -96,9 +117,9 @@ void enemiesInit(bool everything)
     bats[i].pos.x = 0;
     bats[i].pos.y = 0;
     bats[i].active = false;
-    bats[i].HP = 15;
+    bats[i].HP = 3;
     bats[i].direction = true;
-    bats[i].hurt = false;
+    //bats[i].hurt = false;
   
     // Ghosts
     ghosts[i].pos.x = 0;
@@ -106,9 +127,17 @@ void enemiesInit(bool everything)
     ghosts[i].speed.x = 0;
     ghosts[i].speed.y = 0;
     ghosts[i].active = false;
-    ghosts[i].HP = 50;
+    ghosts[i].HP = 12;
     ghosts[i].direction = true;
-    ghosts[i].hurt = false;       
+    //ghosts[i].hurt = false;
+
+    //Sun
+    sun.pos.x=0;
+    sun.pos.y=0;
+    sun.direction=0;
+    sun.HP=30;
+    //sun.hurt=false;
+    sun.active=false;
   }
 }
 void enemiesInit(){
@@ -152,7 +181,7 @@ void batsCreate(vec2 pos)
   }
 }
 
-void ghostsCreate(vec2 pos)
+void ghostsCreate(vec2 pos, bool canShoot_)
 {
   for (byte i = 0; i < MAX_PER_TYPE; ++i)
   //for (byte i = MAX_PER_TYPE-1; i < MAX_PER_TYPE; --i)
@@ -160,11 +189,19 @@ void ghostsCreate(vec2 pos)
     if (!ghosts[i].active)
     {
       ghosts[i].pos = pos << 4;
-      ghosts[i].pos.y += 4;
+      //ghosts[i].pos.y += 4;
       ghosts[i].active = true;
+      ghosts[i].canShoot = canShoot_;
       return;
     }
   }
+}
+
+void sunCreate(vec2 pos)
+{
+  sun.pos = pos << 4;
+  sun.active = true;
+  sun.direction =true;
 }
 
 void spikesCreate(vec2 pos, byte l)
@@ -287,14 +324,12 @@ void enemiesUpdate()
     }
 
     // Ghosts
-    //25746 - 25758
     if (ghosts[i].active)
     {
       ennemiesLeft++;
-      HighRect ennemiRect = {.x = ghosts[i].pos.x, .y = ghosts[i].pos.y, .width = 100, .height = 60};
-      HighRect kidPoint = {.x=kid.pos.x, .y=kid.pos.y, .width=100,.height=60}; 
+      HighRect ennemiRect = {.x = ghosts[i].pos.x, .y = ghosts[i].pos.y, .width = 100, .height = 70};
+      HighRect kidPoint = {.x=kid.pos.x, .y=kid.pos.y, .width=100,.height=70}; 
       if (collide(kidPoint,ennemiRect) && ghosts[i].HP > 0){
-        //23714 - 23722
         if (((0x04==(globalCounter&0x07))||(0x10==(globalCounter&0x31))||(0x17==(globalCounter&0x3F))) && (0x40!=(globalCounter&0x60))  ){
         //if (arduboy.everyXFrames(5-((globalCounter&0x30)>>4))){
           ghosts[i].direction = ghosts[i].pos.x<kid.pos.x;
@@ -311,6 +346,22 @@ void enemiesUpdate()
             ghosts[i].pos.y--;
           }
         }
+        if (arduboy.everyXFrames(150)&&ghosts[i].canShoot){  //ghost is firing
+          for (uint8_t j=0; j<MAX_PER_TYPE; j++){
+            if (!ennemiBullets[j].isActive){
+              ennemiBullets[j].isActive=true;
+              ennemiBullets[j].radius = 0;
+              ennemiBullets[j].pos.y=ghosts[i].pos.y+4;
+              //ennemiBullets[j].pos.x=ghosts[i].pos.x+4;
+              ennemiBullets[j].actualpos.x=(ghosts[i].pos.x+6)<<5;//+64;
+              //bool dir = direction;            
+              ennemiBullets[j].speed.x= (ghosts[i].direction? 1:-1)*WEAPON_SPEED;
+              //ennemiBullets[j].speed.y=0;
+              ennemiBullets[j].timer=SHOT_TIMER;
+              break;
+            }
+          }
+        }
       }
       arduboy.fillRect(ghosts[i].pos.x - cam.pos.x + 1 , ghosts[i].pos.y - cam.pos.y + 3, 10, 7, 0);
       if (ghosts[i].HP>0){        
@@ -324,14 +375,62 @@ void enemiesUpdate()
           ghosts[i].active=false;
         }
       }
-    }    
-
+    }
+  
+    // bullets
+    if (ennemiBullets[i].isActive){
+      ennemiBullets[i].check();
+      ennemiBullets[i].draw(cam.pos);
+    }
     // Coins
     if (coins[i].active)
     {
       sprites.drawOverwrite(coins[i].pos.x - cam.pos.x, coins[i].pos.y - cam.pos.y, elements, 0);
     }
+  } // end of "for (i..."
+
+  //Sun
+  if (sun.active)
+  {
+    ennemiesLeft++;
+    HighRect ennemiRect = {.x = sun.pos.x, .y = sun.pos.y, .width = 100, .height = 70};
+    HighRect kidPoint = {.x=kid.pos.x, .y=kid.pos.y, .width=100,.height=70}; 
+    if (collide(kidPoint,ennemiRect) && sun.HP > 0){        
+      if (0==globalCounter%3){
+        sun.pos.x+=circleMove[sun.direction];
+        sun.pos.y+=circleMove[(sun.direction+4)%16];
+        if (/*(random(100)<5)||*/(gridGetSolid(sun.pos.x >> 4 ,sun.pos.y >> 4))){
+          sun.direction=(sun.direction+8)%16;
+          sun.pos.x+=circleMove[sun.direction];
+          sun.pos.y+=circleMove[(sun.direction+4)%16];
+        }
+        else if (random(100)<5){
+          sun.clockwise=!sun.clockwise;
+        }          
+        if (0==globalCounter%9){
+          if (sun.clockwise){
+            if (++sun.direction>15)
+              sun.direction=0;
+          }
+          else{
+            if (sun.direction--==0)
+              sun.direction=15;
+          }
+        }
+      }
+    }
+    if (sun.HP>0)
+      sprites.drawSelfMasked(sun.pos.x-8 - cam.pos.x, sun.pos.y-8 - cam.pos.y, SunSprite, (globalCounter&0x02)>>1);
+    else{
+      sun.HP--;
+      if (arduboy.everyXFrames(2))
+        sprites.drawSelfMasked(sun.pos.x-8 - cam.pos.x, sun.pos.y-8 - cam.pos.y, SunSprite, 2);
+      if (sun.HP<-30){
+        sun.active=false;
+      }
+    }
   }
+  
   if (bossRoom&&(0==ennemiesLeft)){
     //LvlUp
     gameState=STATE_GAME_LVLUP;

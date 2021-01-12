@@ -10,6 +10,7 @@
    recovering balloons.
   ----------------------------*/
 #define HARD_MODE
+//#define CHEAT 
 
 #include <Arduino.h>
 #include <Arduboy2.h>
