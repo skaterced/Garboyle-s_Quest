@@ -36,6 +36,7 @@ void drawCoinHUD()
   }*/
 }
 
+/*
 void drawNumbers(byte numbersX, byte numbersY, byte fontType, byte data)
 {
   char buf[10];
@@ -97,5 +98,5 @@ void drawNumbers(byte numbersX, byte numbersY, byte fontType, byte data)
     }
   }
 }
-
+*/
 #endif

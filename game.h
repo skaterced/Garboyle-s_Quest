@@ -21,20 +21,22 @@ byte toneindex = 0;
 void stateMenuPlayNew()
 {
   level = LEVEL_TO_START_WITH - 1;
-  coinsCollected = 0;
-  totalCoins = 0;
-  balloonsLeft = 0;
-  scorePlayer = 0;
+ // coinsCollected = 0;
+ // totalCoins = 0;
+ // balloonsLeft = 0;
+//  scorePlayer = 0;
   globalCounter = 0;
   initKid();
   gameState = STATE_GAME_NEXT_LEVEL;
-  scoreIsVisible = false;
-  nextLevelIsVisible = true;
-  pressKeyIsVisible = false;
+ // scoreIsVisible = false;
+ // nextLevelIsVisible = true;
+ // pressKeyIsVisible = false;
 }
 
 void stateMenuPlayContinue()
-{
+{ 
+  stateMenuPlayNew();
+  /*
   level = EEPROM.read(OFFSET_LEVEL);
   totalCoins = EEPROM.read(OFFSET_COINS);
   coinsCollected = 0;
@@ -47,6 +49,7 @@ void stateMenuPlayContinue()
   scoreIsVisible = false;
   nextLevelIsVisible = true;
   pressKeyIsVisible = false;
+  */
 }
 
 
@@ -59,32 +62,7 @@ void stateGameNextLevel()
   //{
     if (arduboy.everyXFrames(20))
     {
-      canPressButton = true;
-      if (coinsCollected > 0)
-      {
-        coinsCollected--;
-        //scorePlayer += 20;
-        //sound.tone(pgm_read_byte(tones + toneindex++), 150);
-      }
-      else if (balloonsLeft > 0)
-      {
-        balloonsLeft--;
-        //scorePlayer += 30;
-        //sound.tone(pgm_read_byte(tones + toneindex++), 150);
-      }
-      else
-      {
-        canPressButton = true;
-        scoreIsVisible = false;
-        pressKeyIsVisible = !pressKeyIsVisible;
-        if (toneindex < TOTAL_TONES)
-        {
-          sound.tone(pgm_read_byte(tones + toneindex++), 200);
-          toneindex = TOTAL_TONES;
-        }
-        if (level >= TOTAL_LEVELS)
-          gameState = STATE_GAME_OVER;
-      }
+ 
     }
 
   // Update EEPROM
@@ -92,40 +70,12 @@ void stateGameNextLevel()
   EEPROM.put(OFFSET_LEVEL, level);
   EEPROM.put(OFFSET_COINS, totalCoins);
   EEPROM.put(OFFSET_SCORE, scorePlayer);
-  
-
-  //if (nextLevelIsVisible)
-  //{
-  if (level < TOTAL_LEVELS)
-  {
-    sprites.drawSelfMasked(35, 4, badgeNextLevel, 0);
-    drawNumbers(78, 13, FONT_BIG, DATA_LEVEL);
-  }
-  else
-  {
-    //EEPROM.put(OFFSET_LEVEL, (byte)LEVEL_TO_START_WITH - 1);
-    // Score remains after completing game? (no)
-    //EEPROM.put(OFFSET_SCORE, (unsigned long)0);
-  }
-  drawNumbers(43, 49, FONT_BIG, DATA_SCORE);
-  //}
-
-  if (scoreIsVisible)
-  {
-    byte totalBadges = coinsCollected + balloonsLeft;
-
-    for (byte i = 0; i < totalBadges; ++i)
-    {
-      if (i < coinsCollected) sprites.drawOverwrite(65 - (7 * totalBadges) + (i * 14), 27, badgeElements, 0);
-      else sprites.drawOverwrite(65 - (7 * totalBadges) + (i * 14), 27, badgeElements, 1);
-    }
-  }*/
-
+  */
 
   //toneindex = 0;
   //sound.tone(425, 20);
   setKid();
-  //cam.pos = vec2(0, 0);
+  cam.pos = vec2(0, 0);
   cam.pos = vec2(0, LEVEL_HEIGHT - 64);
   cam.offset = vec2(0, 0);
   enemiesInit();
@@ -231,13 +181,14 @@ void stateGameLvlUp()
 void stateGameOver()
 {
   byte x = 35 + 12;
+  /*
   if (level < TOTAL_LEVELS)
   {
     drawNumbers(78, 26, FONT_BIG, DATA_LEVEL);
     x -= 12;
-  }
+  }*/
   sprites.drawSelfMasked(x, 17, badgeGameOver, 0);
-  drawNumbers(43, 49, FONT_BIG, DATA_SCORE);
+  //drawNumbers(43, 49, FONT_BIG, DATA_SCORE);
   /*
   unsigned long highscore = 0;
   EEPROM.get(OFFSET_HSCORE, highscore);

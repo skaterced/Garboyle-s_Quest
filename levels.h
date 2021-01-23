@@ -22,19 +22,19 @@
 // upper byte tile xxxx ____
 // LSB solid ____ ___x
 
-class BossLvl {
+class BossRew {
   public:
     uint8_t lvl;
     bool alive;
     uint8_t reward;
-    BossLvl(uint8_t l, uint8_t r){
+    BossRew(uint8_t l, uint8_t r){
       lvl=l;
       reward=r;
       alive=true;
     }
 };
 
-class BossLvl bossLevels[NB_BOSS]={BossLvl(3,UPGRADE_FIRE),BossLvl(3,UPGRADE_ARMOR),BossLvl(2,UPGRADE_JUMP),BossLvl(7,UPGRADE_ARMOR),BossLvl(99,0)};
+class BossRew bossLevels[NB_BOSS]={BossRew(3,UPGRADE_FIRE),BossRew(3,UPGRADE_ARMOR),BossRew(2,UPGRADE_JUMP),BossRew(7,UPGRADE_ARMOR),BossRew(99,0)};
 
 void BossLvlCheck(){
   for (uint8_t i=0; i<NB_BOSS; i++){
@@ -91,7 +91,10 @@ void levelLoad(const uint8_t *lvl) {
   
   byte i = 0;
   lvlSettings=pgm_read_byte(lvl);
-  indorLevel=true; //most of them will be I guess
+  if (0x80==(lvlSettings&0x80))
+    indorLevel=false;
+  else
+    indorLevel=true; //most of them will be I guess
   switch((lvlSettings&0x70)>>4){
     case 1:
       level_width_cell = 8;
@@ -102,13 +105,13 @@ void levelLoad(const uint8_t *lvl) {
       level_height_cell = 8;
     break;
     case 3:
-      level_width_cell = 16;
+      level_width_cell = 24;
       level_height_cell = 16;
     break;
     case 4:
       level_width_cell = 32;
       level_height_cell = 16;
-      indorLevel=false;
+      //indorLevel=false;
     break;
     case 5:
       level_width_cell = 8;
@@ -117,7 +120,7 @@ void levelLoad(const uint8_t *lvl) {
     default:
       level_width_cell = 24;
       level_height_cell = 24;
-      indorLevel=false;
+      //indorLevel=false;
   }
   lvl += 1 + (LEVEL_ARRAY_SIZE >> 3);
 
@@ -169,7 +172,7 @@ void levelLoad(const uint8_t *lvl) {
               ghostsCreate(vec2(x, y),false);
               break;
             case 1:
-              ghostsCreate(vec2(x, y),true);
+              ghostsCreate(vec2(x, y),true); //can fire
               break;
             case 3:
               sunCreate(vec2(x,y));
@@ -184,6 +187,11 @@ void levelLoad(const uint8_t *lvl) {
           spikesCreate(vec2(x, y), pgm_read_byte(lvl + (i - 1)) >> 5);
         }
         break;
+      case LTRAP:
+      {
+        spitterCreate(vec2(x, y));
+      }
+      break;
       case LCOIN:
         {
           // Coins
@@ -193,7 +201,7 @@ void levelLoad(const uint8_t *lvl) {
       default: //case LKEY:
         {
           // Key
-          keyCreate(vec2(x, y));
+//          keyCreate(vec2(x, y));
         }
         break;
       //default:
@@ -209,15 +217,6 @@ void levelLoad(const uint8_t *lvl) {
     kid.actualpos.y = levelExits[wichEntrance-1].pos.y<<5;
     startPos = kid.actualpos;
   }
-  /*
-  if ((lvlSettings&0x80)==0x80){
-    if (BossLvlCheck()){ //check if there's an alive boss in this lvl
-      bossRoom=true;
-    }
-    else {
-      enemiesInit(false); //Clear Ennemies (not spikes)
-    }
-  }*/
   BossLvlCheck();
 }
 
@@ -292,13 +291,13 @@ void checkCollisions()
   //HighRect playerSuckRect = {.x = kid.pos.x + ((kid.direction ^ 1) * 16) - (kid.direction * 16), .y = kid.pos.y + 2, .width = 16, .height = 14};
 
   // Key
-  HighRect keyRect = {.x = key.pos.x, .y = key.pos.y, .width = 8, .height = 16};
+/*  HighRect keyRect = {.x = key.pos.x, .y = key.pos.y, .width = 8, .height = 16};
   if (collide(keyRect, playerRect) && key.active)
   {
     key.active = false;
     key.haveKey = true;
     //sound.tone(420, 200);
-  }
+  }*/
 
   // Level exit
   for (uint8_t i=0; i<MAX_DOORS ; i++){
@@ -315,22 +314,23 @@ void checkCollisions()
     }
   }
 
-  // Enemies and objects
-  //for (byte i = 0; i < MAX_PER_TYPE; ++i)
-  for (byte i = MAX_PER_TYPE-1; i < MAX_PER_TYPE; --i)
-  {
-    // Coins
-    if (coins[i].active)
+    // Heart Bonus
+    if (heartBonus/*coins[i]*/.active)
     {
-      HighRect coinrect = {.x = coins[i].pos.x, .y = coins[i].pos.y, .width = 10, .height = 12};
+      HighRect coinrect = {.x = heartBonus.pos.x, .y = heartBonus.pos.y, .width = 10, .height = 12};
       if (collide(playerRect, coinrect))
       {
         if (kid.hearts<heartsMax){
-          coins[i].active=false;
+          heartBonus.active=false;
           kid.hearts++;
         }
       }
     }
+
+  // Enemies and objects
+  //for (byte i = 0; i < MAX_PER_TYPE; ++i)
+  for (byte i = MAX_PER_TYPE-1; i < MAX_PER_TYPE; --i)
+  {
     // Bats
     if (bats[i].active)
     {

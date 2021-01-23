@@ -17,7 +17,7 @@
 #define MAX_XSPEED PLAYER_SPEED_WALKING
 #define MAX_XSPEED_FAN 54
 #define MAX_YSPEED 3 * (1 << FIXED_POINT)
-#define CAMERA_OFFSET 16
+#define CAMERA_OFFSET 20 //16
 #define SHOOT_TIMER_INIT 40
 
 extern bool gridGetSolid(int8_t x, int8_t y);
@@ -359,8 +359,9 @@ void drawKid()
         kid.hearts=heartsMax;
         kid.isImune = true;
         kid.actualpos = startPos;
-        if (--kid.lives==0)
-          gameState = STATE_GAME_OVER;
+        
+        gameState = (--kid.lives==0) ? STATE_GAME_OVER : STATE_GAME_NEXT_LEVEL;  //
+
       }
       //--kid.hearts;
     }

@@ -105,20 +105,20 @@ byte gameState = STATE_MENU_MAIN;   // start the game with the TEAM a.r.g. logo
 byte menuSelection = STATE_MENU_PLAY; // PLAY menu item is pre-selected
 byte globalCounter = 0;
 byte level;
-unsigned long scorePlayer;
-byte coinsCollected = 0;
-byte totalCoins = 0;
-byte balloonsLeft;
+//unsigned long scorePlayer;
+//byte coinsCollected = 0;
+//byte totalCoins = 0;
+//byte balloonsLeft;
 
 boolean nextLevelIsVisible;
 boolean scoreIsVisible;
 boolean canPressButton;
 boolean pressKeyIsVisible;
 
-byte walkerFrame = 0;
-byte fanFrame = 0;
-byte coinFrame = 0;
-byte coinsActive = 0;
+//byte walkerFrame = 0;
+//byte fanFrame = 0;
+//byte coinFrame = 0;
+//byte coinsActive = 0;
 Door levelExits [MAX_DOORS];
 uint8_t wichEntrance = 0;
 vec2 startPos = vec2(12,12);

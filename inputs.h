@@ -17,13 +17,6 @@ void checkInputs()
   kid.isWalking = false;
   if (arduboy.pressed(DOWN_BUTTON))
   {
-    if (kid.isClimbing){
-      kid.jumpLetGo=true;
-    }
-    if (kid.isClimbing){
-      kid.direction=!kid.direction;
-      kid.isClimbing=false;
-    }    
     cam.offset.y = -CAMERA_OFFSET;
   }
   else if (arduboy.pressed(UP_BUTTON))
@@ -88,14 +81,7 @@ void checkInputs()
       kid.isFiring = true;
     }
   }
-  /*if (arduboy.pressed(A_BUTTON + DOWN_BUTTON))  gameState = STATE_GAME_PAUSE;
-  if (arduboy.pressed(A_BUTTON) && !kid.isFlying)
-  {
-    kid.isFiring = true;
-  }
-  else
-    kid.isFiring = false;*/
-
+  
   // Jump Button
   if (arduboy.justPressed(B_BUTTON))
   {
@@ -105,10 +91,16 @@ void checkInputs()
       kid.isWalking = false;
       kid.isJumping = true;
       kid.jumpLetGo = false;
-      kid.jumpTimer = PLAYER_JUMP_TIME - 4 +(jumpVelocity/10);
-      kid.speed.y = jumpVelocity;
+      if (arduboy.pressed(DOWN_BUTTON)&&(kid.isClimbing)){
+        kid.isClimbing=false;
+        kid.direction=!kid.direction; // not facing the wall when dropping it 
+      }
+      else {
+        kid.jumpTimer = PLAYER_JUMP_TIME - 4 +(jumpVelocity/10);
+        kid.speed.y = jumpVelocity;
+      }
       if (arduboy.pressed(RIGHT_BUTTON)){
-        if (!(kid.isClimbing&&(FACING_RIGHT==kid.direction))){ //useless
+        if (!(kid.isClimbing&&(FACING_RIGHT==kid.direction))){
           kid.speed.x = MAX_XSPEED;
         }
         else

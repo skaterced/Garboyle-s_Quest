@@ -7,12 +7,6 @@
 #include "player.h" //for the camera
 //#include "vec2.h"
 
-#define MAX_FAN_PARTICLES 4
-#define FAN_POWER           5
-#define FAN_UP              0
-#define FAN_RIGHT           1
-#define FAN_LEFT            2
-
 #define SPIKES_LEFT         0
 #define SPIKES_DOWN         1
 #define SPIKES_RIGHT        2
@@ -30,7 +24,8 @@ struct Coin
   bool active;
 };
 
-Coin coins[MAX_PER_TYPE];
+//Coin coins[MAX_PER_TYPE];
+Coin heartBonus; //because there's never more than one per level
 
 struct Key
 {
@@ -39,7 +34,7 @@ struct Key
   bool haveKey;
 };
 
-Key key = {.pos = vec2(0, 0), .active = false, .haveKey = false};
+//Key key = {.pos = vec2(0, 0), .active = false, .haveKey = false};
 
 struct Bat
 {
@@ -62,6 +57,16 @@ struct Ghost
   bool hurt;
   bool active;
 };
+
+struct Trap
+{
+  vec2 pos;
+  bool direction; //true if heading right
+  //byte type; // if more than the spitter (could also contains the "firing freq")
+  bool active;
+};
+
+Trap traps[MAX_PER_TYPE];
 
 Ghost ghosts[MAX_PER_TYPE];
 
@@ -95,8 +100,10 @@ Spike spikes[MAX_PER_TYPE];
 
 void enemiesInit(bool everything)
 {
-  coinsActive = 0;
-  //for (byte i = 0; i < MAX_PER_TYPE; ++i)
+  heartBonus.pos.x = 0;
+  heartBonus.pos.y = 0;
+  heartBonus.active = false;
+      
   for (byte i = MAX_PER_TYPE-1; i < MAX_PER_TYPE; --i)
   {
     if (everything){
@@ -104,15 +111,19 @@ void enemiesInit(bool everything)
       spikes[i].pos.x = 0;
       spikes[i].pos.y = 0;
       spikes[i].pos.width = 16;
-      spikes[i].pos.height = 16;
-      
+      spikes[i].pos.height = 16;      
       spikes[i].characteristics = 1;
-      
+
+      //traps
+      traps[i].pos.x=0;
+      traps[i].pos.y=0;
+      traps[i].active=false;
+      /*
       // Coins
       coins[i].pos.x = 0;
       coins[i].pos.y = 0;
-      coins[i].active = false;
-    }    
+      coins[i].active = false;*/
+    }
     // Bats
     bats[i].pos.x = 0;
     bats[i].pos.y = 0;
@@ -143,28 +154,29 @@ void enemiesInit(bool everything)
 void enemiesInit(){
   enemiesInit(true);
 }
+
 void coinsCreate(vec2 pos)
 {
   //for (byte i = 0; i < MAX_PER_TYPE; ++i)
-  for (byte i = MAX_PER_TYPE-1; i < MAX_PER_TYPE; --i)
+  //for (byte i = MAX_PER_TYPE-1; i < MAX_PER_TYPE; --i)
   {
-    if (!coins[i].active)
+    if (!heartBonus.active)
     {
-      ++coinsActive;
-      coins[i].pos = pos << 4;
-      coins[i].pos.x += 2;
-      coins[i].active = true;
+      //++coinsActive;
+      heartBonus.pos = pos << 4;
+      heartBonus.pos.x += 2;
+      heartBonus.active = true;
       return;
     }
   }
 }
-
+/*
 void keyCreate(vec2 pos)
 {
   key.pos = pos << 4;
   key.active = true;
   key.haveKey = false;
-}
+}*/
 
 void batsCreate(vec2 pos)
 {
@@ -197,7 +209,7 @@ void ghostsCreate(vec2 pos, bool canShoot_)
   }
 }
 
-void sunCreate(vec2 pos)
+void sunCreate(vec2 pos) // can only be alone
 {
   sun.pos = pos << 4;
   sun.active = true;
@@ -249,26 +261,71 @@ void spikesCreate(vec2 pos, byte l)
   }
 }
 
+void spitterCreate (vec2 pos){
+  for (byte i = 0; i < MAX_PER_TYPE; ++i)
+  {
+    if (!traps[i].active)
+      {
+        traps[i].pos = pos << 4;
+        traps[i].pos.y += 4;
+        traps[i].active = true;
+        // Solid left
+        if (gridGetSolid(pos.x - 1, pos.y))
+        {
+          traps[i].direction=true;
+        }
+        // Solid right
+        else if (gridGetSolid(pos.x + 1, pos.y))
+        {
+          traps[i].direction=false;
+          traps[i].pos.x += 8;
+        }
+      }
+    }
+}
 void enemiesUpdate()
 {
+  /*
   if (arduboy.everyXFrames(6))
   {
     walkerFrame = (++walkerFrame) % 2;
     //coinFrame = (++coinFrame) % 4;
-  }
+  }*/
 
-  if (key.active)
+/*  if (key.active)
   {
     int commonx = key.pos.x - cam.pos.x;
     int commony = key.pos.y - cam.pos.y;
     //sprites.drawOverwrite(commonx, commony, elements, 1);
     arduboy.fillCircle(commonx, commony, 4);
-  }
+  }*/
 
   uint8_t ennemiesLeft=0;
   // Draw spikes first  
   for (byte i = MAX_PER_TYPE-1; i < MAX_PER_TYPE; --i)
   {
+        //traps
+    if (traps[i].active){
+      int commonx = traps[i].pos.x - cam.pos.x;
+      int commony = traps[i].pos.y - cam.pos.y;
+      sprites.drawOverwrite(commonx, commony, SpitterSprite, traps[i].direction);
+      if (arduboy.everyXFrames(150)){
+        for (uint8_t j=0; j<MAX_PER_TYPE; j++){
+            if (!ennemiBullets[j].isActive){
+              ennemiBullets[j].isActive=true;
+              ennemiBullets[j].radius = 0;
+              ennemiBullets[j].pos.y=traps[i].pos.y+5;
+              //ennemiBullets[j].pos.x=ghosts[i].pos.x+4;
+              ennemiBullets[j].actualpos.x=(traps[i].pos.x+6)<<5;//+64;
+              //bool dir = direction;            
+              ennemiBullets[j].speed.x= (traps[i].direction? 1:-1)*WEAPON_SPEED;
+              //ennemiBullets[j].speed.y=0;
+              ennemiBullets[j].timer=SHOT_TIMER;
+              break;
+            }
+        }
+      }
+    }
     if (bitRead(spikes[i].characteristics, 2)) // spike active
     {
       int commonx = spikes[i].pos.x - cam.pos.x;
@@ -289,7 +346,6 @@ void enemiesUpdate()
 //  if (arduboy.everyXFrames(4)) fanFrame = (++fanFrame) % 3;
   for (byte i = 0; i < MAX_PER_TYPE; ++i)
   {
-
     // Bats
     if (bats[i].active)
     {
@@ -308,7 +364,7 @@ void enemiesUpdate()
       }
 
       if (bats[i].HP>0){        
-        sprites.drawSelfMasked(bats[i].pos.x - cam.pos.x, bats[i].pos.y - cam.pos.y, BatSprite, walkerFrame + (bats[i].HP <= 0) * 2);
+        sprites.drawSelfMasked(bats[i].pos.x - cam.pos.x, bats[i].pos.y - cam.pos.y, BatSprite, (globalCounter&(0x04))>>2 + (bats[i].HP <= 0) * 2);
         // Bat's eyes
         arduboy.drawPixel(bats[i].pos.x - cam.pos.x + (bats[i].direction? 4:3), bats[i].pos.y - cam.pos.y+3,0);
         arduboy.drawPixel(bats[i].pos.x - cam.pos.x + (bats[i].direction? 6:5), bats[i].pos.y - cam.pos.y+3,0);
@@ -382,12 +438,13 @@ void enemiesUpdate()
       ennemiBullets[i].check();
       ennemiBullets[i].draw(cam.pos);
     }
-    // Coins
-    if (coins[i].active)
-    {
-      sprites.drawOverwrite(coins[i].pos.x - cam.pos.x, coins[i].pos.y - cam.pos.y, elements, 0);
-    }
   } // end of "for (i..."
+
+    // Coins
+    if (heartBonus.active)
+    {
+      sprites.drawOverwrite(heartBonus.pos.x - cam.pos.x, heartBonus.pos.y - cam.pos.y, elements, 0);
+    }
 
   //Sun
   if (sun.active)
