@@ -3,11 +3,11 @@
 
 struct vec2
 {
-  int x;
-  int y;
+  int16_t x;
+  int16_t y;
 
   vec2() : x(0), y(0) {}
-  vec2(int vx, int vy) : x(vx), y(vy) {}
+  vec2(int16_t vx, int16_t vy) : x(vx), y(vy) {}
 
   vec2 &operator+=(const vec2 &rhs)
   {

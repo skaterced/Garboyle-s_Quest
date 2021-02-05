@@ -41,7 +41,7 @@ struct Bat
   vec2 pos;
   bool direction; //true if heading right
   int8_t HP;
-  bool hurt;
+  //bool hurt;
   bool active;
 };
 
@@ -54,9 +54,10 @@ struct Ghost
   bool direction; //true if heading right 
   bool canShoot;
   int8_t HP;
-  bool hurt;
+  //bool hurt;
   bool active;
 };
+Ghost ghosts[MAX_PER_TYPE];
 
 struct Trap
 {
@@ -68,7 +69,6 @@ struct Trap
 
 Trap traps[MAX_PER_TYPE];
 
-Ghost ghosts[MAX_PER_TYPE];
 
 struct Sun
 {
@@ -77,11 +77,31 @@ struct Sun
   uint8_t direction; //0 is north then clockwise
   bool clockwise;
   int8_t HP;
-  bool hurt;
+  //bool hurt;
   bool active;
 };
 
 Sun sun; //there could only be one per level.
+
+struct Wizard
+{
+  vec2 pos;
+  bool clockwise;
+  int8_t HP;
+  uint8_t state; // firing, orientation, position
+  uint8_t wiz_timer;
+  bool active;
+};
+
+/* wizard pos. (state & 0x05)
+ *     4-----3
+ *   /   \ /   \
+ *  2-----0-----1
+ *   \   / \   /
+ *     5-----6
+ */
+
+Wizard wizard; //there could only be one per level.
 
 //vec2 circleMove[8]={vec2(0,-2),vec2(1,-1),vec2(2,0),vec2(1,1),vec2(0,2),vec2(-1,1),vec2(-2,0),vec2(-1,-1)};
 int8_t circleMove[16]={0,1,2,3,3,3,2,1,0,-1,-2,-3,-3,-3,-2,-1};
@@ -118,19 +138,20 @@ void enemiesInit(bool everything)
       traps[i].pos.x=0;
       traps[i].pos.y=0;
       traps[i].active=false;
+
       /*
       // Coins
       coins[i].pos.x = 0;
       coins[i].pos.y = 0;
       coins[i].active = false;*/
     }
+    
     // Bats
     bats[i].pos.x = 0;
     bats[i].pos.y = 0;
     bats[i].active = false;
     bats[i].HP = 3;
     bats[i].direction = true;
-    //bats[i].hurt = false;
   
     // Ghosts
     ghosts[i].pos.x = 0;
@@ -140,15 +161,21 @@ void enemiesInit(bool everything)
     ghosts[i].active = false;
     ghosts[i].HP = 12;
     ghosts[i].direction = true;
-    //ghosts[i].hurt = false;
 
     //Sun
     sun.pos.x=0;
     sun.pos.y=0;
     sun.direction=0;
     sun.HP=30;
-    //sun.hurt=false;
     sun.active=false;
+
+    //Wizard
+    wizard.pos.x=0;
+    wizard.pos.y=0;
+    wizard.state=0;
+    wizard.wiz_timer=100;
+    wizard.HP=60;
+    wizard.active=false;    
   }
 }
 void enemiesInit(){
@@ -192,7 +219,6 @@ void batsCreate(vec2 pos)
     }
   }
 }
-
 void ghostsCreate(vec2 pos, bool canShoot_)
 {
   for (byte i = 0; i < MAX_PER_TYPE; ++i)
@@ -204,6 +230,8 @@ void ghostsCreate(vec2 pos, bool canShoot_)
       //ghosts[i].pos.y += 4;
       ghosts[i].active = true;
       ghosts[i].canShoot = canShoot_;
+      if (canShoot_)
+        ghosts[i].HP = 19;
       return;
     }
   }
@@ -214,6 +242,12 @@ void sunCreate(vec2 pos) // can only be alone
   sun.pos = pos << 4;
   sun.active = true;
   sun.direction =true;
+}
+
+void wizardCreate(vec2 pos) // can only be alone
+{
+  wizard.pos = pos << 4;
+  wizard.active = true;
 }
 
 void spikesCreate(vec2 pos, byte l)
@@ -280,9 +314,11 @@ void spitterCreate (vec2 pos){
           traps[i].direction=false;
           traps[i].pos.x += 8;
         }
+        break;
       }
     }
 }
+
 void enemiesUpdate()
 {
   /*
@@ -304,7 +340,7 @@ void enemiesUpdate()
   // Draw spikes first  
   for (byte i = MAX_PER_TYPE-1; i < MAX_PER_TYPE; --i)
   {
-        //traps
+     //traps
     if (traps[i].active){
       int commonx = traps[i].pos.x - cam.pos.x;
       int commony = traps[i].pos.y - cam.pos.y;
@@ -346,6 +382,7 @@ void enemiesUpdate()
 //  if (arduboy.everyXFrames(4)) fanFrame = (++fanFrame) % 3;
   for (byte i = 0; i < MAX_PER_TYPE; ++i)
   {
+  
     // Bats
     if (bats[i].active)
     {
@@ -353,7 +390,6 @@ void enemiesUpdate()
       if (arduboy.everyXFrames(2) && bats[i].HP > 0 )
       {
         if (!gridGetSolid((bats[i].pos.x + (bats[i].direction? 9:0)) >> 4, bats[i].pos.y >> 4))
-            /*&& gridGetSolid((bats[i].pos.x + 4 + (bats[i].direction * 5)) >> 4, (bats[i].pos.y >> 4) + 1))*/
         {
           bats[i].pos.x += bats[i].direction? 1:-1;
         }
@@ -456,7 +492,7 @@ void enemiesUpdate()
       if (0==globalCounter%3){
         sun.pos.x+=circleMove[sun.direction];
         sun.pos.y+=circleMove[(sun.direction+4)%16];
-        if (/*(random(100)<5)||*/(gridGetSolid(sun.pos.x >> 4 ,sun.pos.y >> 4))){
+        if ((gridGetSolid(sun.pos.x >> 4 ,sun.pos.y >> 4))){
           sun.direction=(sun.direction+8)%16;
           sun.pos.x+=circleMove[sun.direction];
           sun.pos.y+=circleMove[(sun.direction+4)%16];
@@ -487,7 +523,163 @@ void enemiesUpdate()
       }
     }
   }
-  
+
+  //Wizard
+  if (wizard.active)
+  {
+    bool direction = (wizard.pos.x<kid.pos.x);
+    ennemiesLeft++;
+    HighRect ennemiRect = {.x = wizard.pos.x, .y = wizard.pos.y, .width = 100, .height = 70};
+    HighRect kidPoint = {.x=kid.pos.x, .y=kid.pos.y, .width=100,.height=70}; 
+    if (collide(kidPoint,ennemiRect) && wizard.HP > 0){   
+      uint8_t wizRand = random(100);
+      
+      if (--wizard.wiz_timer==0){
+        if (0!=(wizard.state&0x38)){
+          wizard.state&=0xC7; //mask orientation
+          wizard.wiz_timer=50; // wait a bit
+        }
+        else {
+          if ((wizRand<20)&&(0==(wizard.state&0x40))){ //wait          
+            wizard.state|=0x40;
+            wizard.wiz_timer=100;
+          }
+          else if ((wizRand<40)&&(0==(wizard.state&0x80))){ //fire            
+            wizard.state|=0x80;
+            wizard.wiz_timer=100; //actual firing when timer is at 50
+          }
+          else { //move
+            wizard.wiz_timer=80;
+            wizRand = random(60);
+            switch (wizard.state&0x07){
+              case 0:
+                wizRand=wizRand/10+1;
+                wizard.state = (wizRand|(wizRand<<3));
+              break;
+              case 1:
+                if (wizRand<20)
+                  wizard.state = (3|(4<<3));
+                else if (wizRand<40)
+                  wizard.state = (0|(2<<3));
+                else
+                  wizard.state = (6|(5<<3));
+              break;
+              case 2:
+                if (wizRand<20)
+                  wizard.state = (4|(3<<3));
+                else if (wizRand<40)
+                  wizard.state = (0|(1<<3));
+                else
+                  wizard.state = (5|(6<<3));
+              break;
+              case 3:
+                if (wizRand<20)
+                  wizard.state = (4|(2<<3));
+                else if (wizRand<40)
+                  wizard.state = (0|(5<<3));
+                else
+                  wizard.state = (1|(6<<3));
+              break;
+              case 4:
+                if (wizRand<20)
+                  wizard.state = (3|(1<<3));
+                else if (wizRand<40)
+                  wizard.state = (0|(6<<3));
+                else
+                  wizard.state = (2|(5<<3));
+              break;
+              case 5:
+                if (wizRand<20)
+                  wizard.state = (2|(4<<3));
+                else if (wizRand<40)
+                  wizard.state = (0|(3<<3));
+                else
+                  wizard.state = (6|(1<<3));
+              break;
+              case 6:
+                if (wizRand<20)
+                  wizard.state = (5|(2<<3));
+                else if (wizRand<40)
+                  wizard.state = (0|(4<<3));
+                else
+                  wizard.state = (1|(3<<3));
+              break;
+              //default:
+                // should never happens, unknown position
+                //arduboy.fillCircle(wizard.pos.x - cam.pos.x  , wizard.pos.y - cam.pos.y ,5,1);
+              
+            }
+          }
+        }
+      }
+      else { // wiz_timer is running
+        if (0!=(wizard.state&0x80)&&(wizard.wiz_timer==50)){
+          for (uint8_t j=0; j<MAX_PER_TYPE; j++){              
+              if (!ennemiBullets[j].isActive){
+                ennemiBullets[j].isActive=true;
+                ennemiBullets[j].radius = 2;
+                ennemiBullets[j].pos.y=wizard.pos.y+9;                
+                ennemiBullets[j].actualpos.x=(wizard.pos.x+5*direction)<<5;//+64; // to change
+                //bool dir = direction;            
+                ennemiBullets[j].speed.x= (direction? 1:-1)*WEAPON_SPEED;
+                //ennemiBullets[j].speed.y=0;
+                ennemiBullets[j].timer=SHOT_TIMER;
+                break;
+              }
+            }
+        }
+        if (0==globalCounter%2){
+          switch ((wizard.state&0x38)>>3) { //moving
+            case 1:
+              wizard.pos.x+=2;
+            break;
+            case 2:
+              wizard.pos.x-=2;
+            break;
+            case 3:
+              wizard.pos.x+=1;
+              wizard.pos.y-=1;
+            break;
+            case 4:
+              wizard.pos.x-=1;
+              wizard.pos.y-=1;
+            break;
+            case 5:
+              wizard.pos.x-=1;
+              wizard.pos.y+=1;
+            break;
+            case 6:
+              wizard.pos.x+=1;
+              wizard.pos.y+=1;
+            break;
+          }
+        }
+      }
+    }
+    if (wizard.HP>0){
+      if (0==(wizard.state&0x80)){
+        arduboy.fillCircle(wizard.pos.x - cam.pos.x +6 , wizard.pos.y - cam.pos.y +5 ,4,0);
+        sprites.drawSelfMasked(wizard.pos.x - cam.pos.x, wizard.pos.y - cam.pos.y, WizardSprite, 0);
+      }
+      else{
+        sprites.drawSelfMasked(wizard.pos.x - cam.pos.x - 5 + direction, wizard.pos.y - cam.pos.y, WizardFiringSprite, direction);
+      }
+      /*if (0==wizard.state&0x07)
+        arduboy.fillCircle(wizard.pos.x - cam.pos.x  , wizard.pos.y - cam.pos.y ,5,1);
+      if (0==wizard.state&0x38)
+        arduboy.fillCircle(wizard.pos.x - cam.pos.x +2  , wizard.pos.y + 10 - cam.pos.y ,5,1);*/
+    }
+    else{
+      wizard.HP--;
+      if (arduboy.everyXFrames(2)) {
+        arduboy.fillCircle(wizard.pos.x - cam.pos.x +8 , wizard.pos.y - cam.pos.y +4 ,4,0);
+        sprites.drawSelfMasked(wizard.pos.x - cam.pos.x, wizard.pos.y - cam.pos.y, WizardSprite, 1);
+      }
+      if (wizard.HP<-70){
+        wizard.active=false;
+      }
+    }
+  }
   if (bossRoom&&(0==ennemiesLeft)){
     //LvlUp
     gameState=STATE_GAME_LVLUP;

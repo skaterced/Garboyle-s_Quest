@@ -7,7 +7,7 @@
 //#include "Point.h"
 #include "player.h"
 
-#define NB_BOSS 5 //the last one is reserved for the cheat
+#define NB_BOSS 6 //the last one is reserved for the cheat
 /*
 #define LSTART  0
 #define LFINISH 1 << 5
@@ -34,7 +34,8 @@ class BossRew {
     }
 };
 
-class BossRew bossLevels[NB_BOSS]={BossRew(3,UPGRADE_FIRE),BossRew(3,UPGRADE_ARMOR),BossRew(2,UPGRADE_JUMP),BossRew(7,UPGRADE_ARMOR),BossRew(99,0)};
+// defines if a lvl is a Boss lvl. Can have several reward
+class BossRew bossLevels[NB_BOSS]={BossRew(3,UPGRADE_FIRE),BossRew(3,UPGRADE_ARMOR),BossRew(2,UPGRADE_JUMP),BossRew(10,UPGRADE_WINGS),BossRew(7,UPGRADE_ARMOR),BossRew(99,0)};
 
 void BossLvlCheck(){
   for (uint8_t i=0; i<NB_BOSS; i++){
@@ -177,7 +178,9 @@ void levelLoad(const uint8_t *lvl) {
             case 3:
               sunCreate(vec2(x,y));
               break;
-              
+            case 4:
+              wizardCreate(vec2(x,y));
+              break;              
           }
         }
         break;        
@@ -298,7 +301,7 @@ void checkCollisions()
     key.haveKey = true;
     //sound.tone(420, 200);
   }*/
-
+  
   // Level exit
   for (uint8_t i=0; i<MAX_DOORS ; i++){
     if (-1!=levelExits[i].pos.y){
@@ -331,6 +334,7 @@ void checkCollisions()
   //for (byte i = 0; i < MAX_PER_TYPE; ++i)
   for (byte i = MAX_PER_TYPE-1; i < MAX_PER_TYPE; --i)
   {
+    
     // Bats
     if (bats[i].active)
     {
@@ -343,9 +347,7 @@ void checkCollisions()
             bats[i].HP-=firePower;
             kid.fireBalls[j].isActive=false;
             //bats[i].hurt = true;
-            /*if (bats[i].HP <= 0) {
-              bats[i].active = false;
-            }*/
+
           }
           //else
             //bats[i].hurt = false;
@@ -399,6 +401,7 @@ void checkCollisions()
       if (kid.pos.y < spikes[i].pos.y) kid.speed.y = jumpVelocity;
     }
   }
+  
   if (sun.active){
     HighRect ennemiRect = {.x = sun.pos.x, .y = sun.pos.y, .width = 16, .height = 16};
     for (uint8_t j=0; j<MAX_WEAPON; j++){
@@ -417,6 +420,27 @@ void checkCollisions()
       kidHurt();
       kid.speed.y = jumpVelocity/2;
       kid.speed.x = max(min((kid.pos.x - sun.pos.x - 2), 2), -2) << FIXED_POINT;
+    }      
+  }
+  
+  if (wizard.active){
+    HighRect ennemiRect = {.x = wizard.pos.x, .y = wizard.pos.y, .width = 16, .height = 23};
+    for (uint8_t j=0; j<MAX_WEAPON; j++){
+      if (kid.fireBalls[j].isActive){
+        HighRect projectileRect = {.x = kid.fireBalls[j].pos.x-firePower, .y = kid.fireBalls[j].pos.y-firePower, .width = 1+2*(firePower), .height = 1+2*(firePower)};
+        if (collide(projectileRect, ennemiRect))
+        {
+          wizard.HP-=firePower;
+          kid.fireBalls[j].isActive=false;
+        }
+      }
+    }
+    // Hurt player
+    if (collide(playerRect, ennemiRect) && wizard.HP > 0 && !kid.isImune)
+    {
+      kidHurt();
+      kid.speed.y = jumpVelocity/2;
+      kid.speed.x = max(min((kid.pos.x - wizard.pos.x - 2), 2), -2) << FIXED_POINT;
     }      
   }
 }
