@@ -26,13 +26,13 @@ struct Coin
 
 //Coin coins[MAX_PER_TYPE];
 Coin heartBonus; //because there's never more than one per level
-
+/*
 struct Key
 {
   vec2 pos;
   bool active;
   bool haveKey;
-};
+};*/
 
 //Key key = {.pos = vec2(0, 0), .active = false, .haveKey = false};
 
@@ -86,7 +86,7 @@ Sun sun; //there could only be one per level.
 struct Wizard
 {
   vec2 pos;
-  bool clockwise;
+  //bool clockwise;
   int8_t HP;
   uint8_t state; // firing, orientation, position
   uint8_t wiz_timer;
@@ -102,6 +102,26 @@ struct Wizard
  */
 
 Wizard wizard; //there could only be one per level.
+
+struct Faceless
+{
+  vec2 pos;
+  bool direction;
+  int8_t HP;
+  uint8_t state; // firing, orientation, position
+  uint8_t timer;
+  bool active;
+};
+
+/* Faceless pos. (state & 0x05)
+ *  1-----------4
+ *     \     /   
+ *  2-----0-----5
+ *     /     \   
+ *  3-----------6
+ */
+
+Faceless faceless; //there could only be one per level.
 
 //vec2 circleMove[8]={vec2(0,-2),vec2(1,-1),vec2(2,0),vec2(1,1),vec2(0,2),vec2(-1,1),vec2(-2,0),vec2(-1,-1)};
 int8_t circleMove[16]={0,1,2,3,3,3,2,1,0,-1,-2,-3,-3,-3,-2,-1};
@@ -159,7 +179,7 @@ void enemiesInit(bool everything)
     ghosts[i].speed.x = 0;
     ghosts[i].speed.y = 0;
     ghosts[i].active = false;
-    ghosts[i].HP = 12;
+    ghosts[i].HP = 12;  // 19 if "can shoot"
     ghosts[i].direction = true;
 
     //Sun
@@ -175,7 +195,16 @@ void enemiesInit(bool everything)
     wizard.state=0;
     wizard.wiz_timer=100;
     wizard.HP=60;
-    wizard.active=false;    
+    wizard.active=false;
+
+     //faceless
+    faceless.pos.x=0;
+    faceless.pos.y=0;
+    faceless.direction=FACING_LEFT;
+    faceless.state=6;
+    faceless.timer=100;
+    faceless.HP=60;
+    faceless.active=false; 
   }
 }
 void enemiesInit(){
@@ -250,6 +279,12 @@ void wizardCreate(vec2 pos) // can only be alone
   wizard.active = true;
 }
 
+void facelessCreate(vec2 pos) // can only be alone
+{
+  faceless.pos = pos << 4;
+  faceless.active = true;
+}
+
 void spikesCreate(vec2 pos, byte l)
 {
   for (byte i = 0; i < MAX_PER_TYPE; ++i)
@@ -321,21 +356,6 @@ void spitterCreate (vec2 pos){
 
 void enemiesUpdate()
 {
-  /*
-  if (arduboy.everyXFrames(6))
-  {
-    walkerFrame = (++walkerFrame) % 2;
-    //coinFrame = (++coinFrame) % 4;
-  }*/
-
-/*  if (key.active)
-  {
-    int commonx = key.pos.x - cam.pos.x;
-    int commony = key.pos.y - cam.pos.y;
-    //sprites.drawOverwrite(commonx, commony, elements, 1);
-    arduboy.fillCircle(commonx, commony, 4);
-  }*/
-
   uint8_t ennemiesLeft=0;
   // Draw spikes first  
   for (byte i = MAX_PER_TYPE-1; i < MAX_PER_TYPE; --i)
@@ -486,13 +506,13 @@ void enemiesUpdate()
   if (sun.active)
   {
     ennemiesLeft++;
-    HighRect ennemiRect = {.x = sun.pos.x, .y = sun.pos.y, .width = 100, .height = 70};
+    HighRect ennemiRect = {.x = sun.pos.x-8, .y = sun.pos.y-8, .width = 100, .height = 70};
     HighRect kidPoint = {.x=kid.pos.x, .y=kid.pos.y, .width=100,.height=70}; 
     if (collide(kidPoint,ennemiRect) && sun.HP > 0){        
       if (0==globalCounter%3){
         sun.pos.x+=circleMove[sun.direction];
         sun.pos.y+=circleMove[(sun.direction+4)%16];
-        if ((gridGetSolid(sun.pos.x >> 4 ,sun.pos.y >> 4))){
+        if ((gridGetSolid(sun.pos.x-8 >> 4 ,sun.pos.y-8 >> 4))){
           sun.direction=(sun.direction+8)%16;
           sun.pos.x+=circleMove[sun.direction];
           sun.pos.y+=circleMove[(sun.direction+4)%16];

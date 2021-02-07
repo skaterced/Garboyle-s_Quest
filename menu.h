@@ -12,9 +12,9 @@
 #define DATA_SCORE                1
 #define DATA_LEVEL                2
 
-byte blinkingFrames = 0;
-byte sparkleFrames = 0;
-byte cont = 0;
+//byte blinkingFrames = 0;
+//byte sparkleFrames = 0;
+uint8_t cont = 0;
 
 extern void drawNumbers(byte numbersX, byte numbersY, byte fontType, byte data);
 
@@ -35,18 +35,11 @@ void drawTitleScreen()
 void stateMenuIntro()
 {
   globalCounter++;
-  if (globalCounter < 160)
+  drawTitleScreen();
+  if (/*(globalCounter > 250) ||*/ arduboy.justPressed(A_BUTTON | B_BUTTON))
   {
-    sprites.drawSelfMasked(34, 4, T_arg, 0);
-  }
-  else
-  {
-    drawTitleScreen();
-    if ((globalCounter > 250) || arduboy.justPressed(A_BUTTON | B_BUTTON))
-    {
-      gameState = STATE_GAME_PLAYCONTNEW; //STATE_MENU_MAIN;
-      //sound.tone(425, 20);
-    }
+    gameState = STATE_MENU_MAIN;
+    //sound.tone(425, 20);
   }
 }
 
@@ -55,7 +48,8 @@ void stateMenuMain()
 
   drawTitleScreen();
   if (arduboy.justPressed(A_BUTTON | B_BUTTON))
-    gameState=STATE_GAME_PLAYCONTNEW;
+    //gameState=STATE_GAME_PLAYCONTNEW;
+    gameState=STATE_MENU_PLAY;
   /*
   sprites.drawOverwrite(101, 9, mainMenu, 0);
   if (arduboy.justPressed(DOWN_BUTTON) && (menuSelection < 5))
@@ -78,13 +72,13 @@ void stateMenuMain()
 }
 
 void stateMenuHelp()
-{
+{/*
   for (byte i = 0; i < 2; i++) sprites.drawSelfMasked(32, 32 * i, qrcode, i);
   if (arduboy.justPressed(A_BUTTON | B_BUTTON))
   {
     gameState = STATE_MENU_MAIN;
     //sound.tone(425, 20);
-  }
+  }*/
 }
 
 
@@ -112,8 +106,10 @@ void stateMenuInfo()
   }*/
 }
 
-void stateMenuSoundfx()
+void stateMenuGameOver() // finalement non, je mets tout dans game.h pour avoir accès aux autres .h
 {
+
+  /*
   drawTitleScreen();
   sprites.drawOverwrite(51, 9, soundMenu, 0);
   if (arduboy.justPressed(DOWN_BUTTON))
@@ -129,12 +125,13 @@ void stateMenuSoundfx()
     gameState = STATE_MENU_MAIN;
     //sound.tone(425, 20);
   }
+  */
 }
 
 void stateMenuPlaySelect()
 {
   drawTitleScreen();
-  sprites.drawOverwrite(103, 18, continueMenu, 0);
+  sprites.drawOverwrite(52, 17, loadMenu_bitmap, 0);
   if (arduboy.justPressed(DOWN_BUTTON))
   {
     cont = 1;
@@ -145,18 +142,20 @@ void stateMenuPlaySelect()
     cont = 0;
     //sound.tone(300, 20);
   }
-  sprites.drawPlusMask(58, 18 + 9 * cont, selector_plus_mask, 0);
-  if (arduboy.justPressed(B_BUTTON))
+//  sprites.drawPlusMask(58, 18 + 9 * cont, selector_plus_mask, 0);
+  arduboy.fillCircle(47, 22 + 9 * cont, 3, 1);
+  arduboy.fillCircle(47, 22 + 9 * cont, 1, 0);
+  if (arduboy.justPressed(B_BUTTON|A_BUTTON))
   {
-    gameState = STATE_GAME_PLAYCONTNEW + cont;
+    gameState = STATE_GAME_PLAYCONTNEW + 1 - cont;
     cont = 0;
     //sound.tone(425, 20);
   }
-  if (arduboy.justPressed(A_BUTTON))
+  /*if (arduboy.justPressed())
   {
     gameState = STATE_MENU_MAIN;
     //sound.tone(425, 20);
-  }
+  }*/
 }
 
 

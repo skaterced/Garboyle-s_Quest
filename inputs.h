@@ -23,27 +23,28 @@ void checkInputs()
   {
     cam.offset.y = CAMERA_OFFSET;
   }
-  if (!(kid.isFiring||kid.isClimbing)) 
+  if (!kid.isClimbing) 
   {
     if (arduboy.pressed(LEFT_BUTTON)){
     //if (!(kid.againstWall&&(FACING_LEFT == kid.direction))){      
       mapTimer = TIMER_AMOUNT;
       cam.offset.x = CAMERA_OFFSET;
       kid.direction = FACING_LEFT;
-      if (!(kid.isJumping || kid.isFlying || kid.isLanding))
-      {
-        if (!gridGetSolid((kid.pos.x - 1) >> 4, (kid.pos.y + 8) >> 4))
-          kid.actualpos.x -= PLAYER_SPEED_WALKING;
-        kid.isWalking = true;
-        kid.speed.x = -1;
+      if (!(kid.isFiring)){
+        if (!(kid.isJumping || kid.isFlying || kid.isLanding))
+        {
+          if (!gridGetSolid((kid.pos.x - 1) >> 4, (kid.pos.y + 8) >> 4))
+            kid.actualpos.x -= PLAYER_SPEED_WALKING;
+          kid.isWalking = true;
+          kid.speed.x = -1;
+        }
+        else
+        {
+          //kid.speed.x = max(kid.speed.x - PLAYER_SPEED_AIR, -MAX_XSPEED);
+          if (kid.speed.x > -MAX_XSPEED)
+            kid.speed.x -= PLAYER_SPEED_AIR;
+        }
       }
-      else
-      {
-        //kid.speed.x = max(kid.speed.x - PLAYER_SPEED_AIR, -MAX_XSPEED);
-        if (kid.speed.x > -MAX_XSPEED)
-          kid.speed.x -= PLAYER_SPEED_AIR;
-      }
-      //}
     }
     else if (arduboy.pressed(RIGHT_BUTTON)){
       //if (!(kid.againstWall&&(FACING_RIGHT == kid.direction)))
@@ -51,24 +52,28 @@ void checkInputs()
         //mapTimer = TIMER_AMOUNT;
         cam.offset.x = -CAMERA_OFFSET;
         kid.direction = FACING_RIGHT;
-        if (!(kid.isJumping || kid.isFlying || kid.isLanding))
-        {
-          if (!gridGetSolid((kid.pos.x + 12) >> 4, (kid.pos.y + 8) >> 4))
-            kid.actualpos.x += PLAYER_SPEED_WALKING;
-          kid.isWalking = true;
-          kid.speed.x = 1;
-        }
-        else
-        {
-          //kid.speed.x = min(kid.speed.x + PLAYER_SPEED_AIR, MAX_XSPEED);
-          if (kid.speed.x < MAX_XSPEED)
-            kid.speed.x += PLAYER_SPEED_AIR;
+        if (!(kid.isFiring)){
+          if (!(kid.isJumping || kid.isFlying || kid.isLanding))
+          {
+            if (!gridGetSolid((kid.pos.x + 12) >> 4, (kid.pos.y + 8) >> 4))
+              kid.actualpos.x += PLAYER_SPEED_WALKING;
+            kid.isWalking = true;
+            kid.speed.x = 1;
+          }
+          else
+          {
+            //kid.speed.x = min(kid.speed.x + PLAYER_SPEED_AIR, MAX_XSPEED);
+            if (kid.speed.x < MAX_XSPEED)
+              kid.speed.x += PLAYER_SPEED_AIR;
+          }
         }
       }
     }
     else
       kid.againstWall = false;
   }
+  else 
+    cam.offset.x = (kid.direction ? -CAMERA_OFFSET : CAMERA_OFFSET);
   kid.isFiring = false;
   if (arduboy.pressed(A_BUTTON))
   {
@@ -85,7 +90,7 @@ void checkInputs()
   // Jump Button
   if (arduboy.justPressed(B_BUTTON))
   {
-    if ((kid.speed.y == 0 && kid.isJumping == false && kid.isLanding == false)||kid.isClimbing)
+    if (((kid.speed.y == 0 || kid.speed.y == -GRAVITY) && kid.isJumping == false && kid.isLanding == false)||kid.isClimbing)
     {
       //sound.tone(200, 100);
       kid.isWalking = false;

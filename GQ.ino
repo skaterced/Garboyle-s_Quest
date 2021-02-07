@@ -18,7 +18,7 @@
 */
 
 //determine the game
-#define GAME_ID 34
+#define GAME_ID 206
 
 #include "globals.h"
 #include "menu.h"
@@ -38,7 +38,7 @@ const FunctionPointer PROGMEM  mainGameLoop[] = {
   stateMenuHelp,
   stateMenuPlaySelect,
   stateMenuInfo,
-  stateMenuSoundfx,
+  stateMenuGameOver,
   stateGameNextLevel,
   stateGamePlaying,
   stateGamePause,
@@ -59,7 +59,7 @@ void setup()
 
 void loop() {
   if (!(arduboy.nextFrame())) return;
-  if (gameState < STATE_GAME_NEXT_LEVEL && arduboy.everyXFrames(10))sparkleFrames = (++sparkleFrames) % 5;
+  //if (gameState < STATE_GAME_NEXT_LEVEL && arduboy.everyXFrames(10))sparkleFrames = (++sparkleFrames) % 5;
   arduboy.pollButtons();
   arduboy.clear();
   ((FunctionPointer) pgm_read_word (&mainGameLoop[gameState]))();

@@ -19,13 +19,13 @@
 #include "bitmaps.h"
 
 // EEPROM - change this address offset from the arduboy starting address if desired
-#define OFFSET_MYBL_START            (EEPROM_STORAGE_SPACE_START + 51)
-#define OFFSET_LEVEL                 (OFFSET_MYBL_START + sizeof(byte))
+#define OFFSET_GQ_START              (EEPROM_STORAGE_SPACE_START + 336)
+#define OFFSET_LEVEL                 (OFFSET_GQ_START + sizeof(byte))
 #define OFFSET_COINS                 (OFFSET_LEVEL + sizeof(byte))
 #define OFFSET_COINSHS               (OFFSET_COINS + sizeof(byte))
 #define OFFSET_SCORE                 (OFFSET_COINSHS + sizeof(byte))
 #define OFFSET_HSCORE                (OFFSET_SCORE + sizeof(unsigned long))
-#define OFFSET_MYBL_END              (OFFSET_HSCORE + sizeof(unsigned long))
+#define OFFSET_GQ_END                (OFFSET_HSCORE + sizeof(unsigned long))
 
 //define menu states (on main menu)
 #define STATE_MENU_INTRO             0
@@ -33,7 +33,7 @@
 #define STATE_MENU_HELP              2
 #define STATE_MENU_PLAY              3
 #define STATE_MENU_INFO              4
-#define STATE_MENU_SOUNDFX           5
+#define STATE_MENU_GAMEOVER          5
 
 //define game states (on main menu)
 #define STATE_GAME_NEXT_LEVEL        6
@@ -102,7 +102,7 @@ uint8_t level_width_cell = 24;
 uint8_t level_height_cell = 24;
 
 byte gameState = STATE_MENU_MAIN;   // start the game with the TEAM a.r.g. logo
-byte menuSelection = STATE_MENU_PLAY; // PLAY menu item is pre-selected
+//byte menuSelection = STATE_MENU_PLAY; // PLAY menu item is pre-selected
 byte globalCounter = 0;
 byte level;
 //unsigned long scorePlayer;
@@ -135,15 +135,16 @@ uint8_t heartsMax = 3; // (armor)
 
 void loadSetEEPROM()
 {
-  if ((EEPROM.read(OFFSET_MYBL_START) != GAME_ID) && (EEPROM.read(OFFSET_MYBL_END) != GAME_ID))
+  if (EEPROM.read(OFFSET_GQ_START) != GAME_ID) //&& (EEPROM.read(OFFSET_GQ_END) != GAME_ID))
   {
-    EEPROM.put(OFFSET_MYBL_START, (byte)GAME_ID); // game id
-    EEPROM.put(OFFSET_LEVEL, (byte)LEVEL_TO_START_WITH - 1); // beginning level
+    EEPROM.put(OFFSET_GQ_START, (byte)GAME_ID); // game id
+    EEPROM.put(OFFSET_LEVEL, (byte)0); // beginning level
+    /*
     EEPROM.put(OFFSET_COINS, (byte)0); // coins current run
     EEPROM.put(OFFSET_COINSHS, (byte)0); // coins highscore run
     EEPROM.put(OFFSET_SCORE, (unsigned long)0); // clear score
     EEPROM.put(OFFSET_HSCORE, (unsigned long)0); // clear high score
-    EEPROM.put(OFFSET_MYBL_END, (byte)GAME_ID); // game id
+    EEPROM.put(OFFSET_GQ_END, (byte)GAME_ID); // game id*/
   }
 }
 

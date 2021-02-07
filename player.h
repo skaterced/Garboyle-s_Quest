@@ -359,7 +359,8 @@ void drawKid()
         kid.hearts=heartsMax;
         kid.isImune = true;
         kid.actualpos = startPos;
-        
+
+        globalCounter = 0; // in case of Game Over
         gameState = (--kid.lives==0) ? STATE_GAME_OVER : STATE_GAME_NEXT_LEVEL;  //
 
       }
@@ -393,7 +394,7 @@ void drawKid()
 
     else
     {
-      sprites.drawPlusMask(kidcam.x , kidcam.y, Firing_plus_mask, kid.isClimbing + 2*(kid.isLanding || kid.isFlying) + 3*kid.direction);
+      sprites.drawSelfMasked(kidcam.x , kidcam.y, FiringSprite, kid.isClimbing + 2*(kid.isLanding || kid.isFlying) + 3*kid.direction);
     }
     if (kid.isFlying){
       sprites. drawSelfMasked(kidcam.x-8, kidcam.y,wings_bitmap,(globalCounter&0x04)>>2);

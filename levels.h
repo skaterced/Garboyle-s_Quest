@@ -7,6 +7,7 @@
 //#include "Point.h"
 #include "player.h"
 
+//change stateMenuPlayContinue() if there's more than 8 bosses
 #define NB_BOSS 6 //the last one is reserved for the cheat
 /*
 #define LSTART  0
@@ -44,7 +45,7 @@ void BossLvlCheck(){
         bossRoom = true;
       }
       else {
-        enemiesInit(false);
+        enemiesInit(false); //Init the level whithout the Boss
       }
       break;
     }
@@ -403,7 +404,7 @@ void checkCollisions()
   }
   
   if (sun.active){
-    HighRect ennemiRect = {.x = sun.pos.x, .y = sun.pos.y, .width = 16, .height = 16};
+    HighRect ennemiRect = {.x = sun.pos.x-8, .y = sun.pos.y-8, .width = 16, .height = 16};
     for (uint8_t j=0; j<MAX_WEAPON; j++){
       if (kid.fireBalls[j].isActive){
         HighRect projectileRect = {.x = kid.fireBalls[j].pos.x-firePower, .y = kid.fireBalls[j].pos.y-firePower, .width = 1+2*(firePower), .height = 1+2*(firePower)};
