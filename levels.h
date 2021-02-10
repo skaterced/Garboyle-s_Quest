@@ -180,6 +180,9 @@ void levelLoad(const uint8_t *lvl) {
               sunCreate(vec2(x,y));
               break;
             case 4:
+              facelessCreate(vec2(x,y));
+              break;
+            case 6:
               wizardCreate(vec2(x,y));
               break;              
           }
@@ -444,6 +447,31 @@ void checkCollisions()
       kid.speed.x = max(min((kid.pos.x - wizard.pos.x - 2), 2), -2) << FIXED_POINT;
     }      
   }
+
+  if (faceless.active){
+    HighRect ennemiRect = {.x = faceless.pos.x, .y = faceless.pos.y, .width = 16, .height = 18};
+    for (uint8_t j=0; j<MAX_WEAPON; j++){
+      if (kid.fireBalls[j].isActive){
+        HighRect projectileRect = {.x = kid.fireBalls[j].pos.x-firePower, .y = kid.fireBalls[j].pos.y-firePower, .width = 1+2*(firePower), .height = 1+2*(firePower)};
+        if (collide(projectileRect, ennemiRect))
+        {          
+          kid.fireBalls[j].isActive=false;
+          if ((faceless.state&0x70)>0x20)
+            faceless.HP-=firePower;
+          else
+            kidHurt();
+        }
+      }
+    }
+    // Hurt player
+    if (collide(playerRect, ennemiRect) && faceless.HP > 0 && !kid.isImune)
+    {
+      kidHurt();
+      kid.speed.y = jumpVelocity/2;
+      kid.speed.x = max(min((kid.pos.x - faceless.pos.x - 2), 2), -2) << FIXED_POINT;
+    }      
+  }
+  
 }
 
 void drawHUD()

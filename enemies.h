@@ -6,6 +6,7 @@
 #include "weapon.h"
 #include "player.h" //for the camera
 //#include "vec2.h"
+//#include "boss.h"
 
 #define SPIKES_LEFT         0
 #define SPIKES_DOWN         1
@@ -113,12 +114,12 @@ struct Faceless
   bool active;
 };
 
-/* Faceless pos. (state & 0x05)
- *  1-----------4
- *     \     /   
- *  2-----0-----5
- *     /     \   
- *  3-----------6
+/* Faceless pos. (state & 0x02)
+ *  0--------0
+ *    /\  / \  
+ *  1---*----1
+ *    \/  \ / 
+ *  2--------2
  */
 
 Faceless faceless; //there could only be one per level.
@@ -201,10 +202,16 @@ void enemiesInit(bool everything)
     faceless.pos.x=0;
     faceless.pos.y=0;
     faceless.direction=FACING_LEFT;
-    faceless.state=6;
-    faceless.timer=100;
+    faceless.state=2;
+    faceless.timer=200;
     faceless.HP=60;
     faceless.active=false; 
+  // state info:         B0SSSMMLL;  
+  //                      ||||||\|
+  //                      |\||\| └-> L: these 2 bits are used to determine the line (0 is top, 2 is bottom)
+  //                      | \| └-->  M: these 2 bits are used to determine the moving direction (0 is going up, 2 is going down)   
+  //                      |  └--->   S: these 3 bits are used to determine the state. 
+  //                      └->        not used (could be direction)
   }
 }
 void enemiesInit(){
@@ -552,9 +559,9 @@ void enemiesUpdate()
     HighRect ennemiRect = {.x = wizard.pos.x, .y = wizard.pos.y, .width = 100, .height = 70};
     HighRect kidPoint = {.x=kid.pos.x, .y=kid.pos.y, .width=100,.height=70}; 
     if (collide(kidPoint,ennemiRect) && wizard.HP > 0){   
-      uint8_t wizRand = random(100);
-      
+      //uint8_t wizRand = random(100);      
       if (--wizard.wiz_timer==0){
+        uint8_t wizRand = random(100);
         if (0!=(wizard.state&0x38)){
           wizard.state&=0xC7; //mask orientation
           wizard.wiz_timer=50; // wait a bit
@@ -700,6 +707,115 @@ void enemiesUpdate()
       }
     }
   }
+  
+  // ------------------- Faceless -------------------------
+  
+  if (faceless.active)
+  {    
+    ennemiesLeft++;
+    //HighRect ennemiRect = {.x = faceless.pos.x, .y = faceless.pos.y, .width = 100, .height = 70};
+    //HighRect kidPoint = {.x=kid.pos.x, .y=kid.pos.y, .width=100,.height=70}; 
+    if (/*collide(kidPoint,ennemiRect) && */ faceless.HP > 0){             
+      if (--faceless.timer==0){
+        faceless.timer=80; //default wait
+        //uint8_t formerPos = (faceless.state&0x07);
+        uint8_t FaceRand = random(60); 
+        switch ((faceless.state&0x70)>>4){
+          case 0:
+            //faceless.timer=20;
+          break;
+          case 1:    //fire
+            faceless.timer=20;
+            /*
+            for (uint8_t j=0; j<MAX_PER_TYPE; j++){    // we could skip the for, only one bullet in this case... 
+              if (!ennemiBullets[j].isActive){
+                ennemiBullets[j].isActive=true;
+                ennemiBullets[j].radius = firePower;
+                ennemiBullets[j].pos.y=faceless.pos.y+4;
+                ennemiBullets[j].actualpos.x=(faceless.pos.x+5*faceless.direction)<<5;
+                ennemiBullets[j].speed.x= (faceless.direction? -1:1)*WEAPON_SPEED;
+                //ennemiBullets[j].speed.y=0;
+                ennemiBullets[j].timer=SHOT_TIMER;
+                break;
+              }
+            }*/
+          break;
+          case 3: case 4:
+            faceless.state &= 0xF3;  // mask "moving direction"
+            faceless.timer=98;            
+//            uint8_t FaceRand = random(60);
+            if ((FaceRand<20)&&((faceless.state&0x03)>0)){ //up
+              //faceless.state &= moving direction already 0
+              faceless.state --;     // changing lane  
+            }
+            else if ((FaceRand>40)&&((faceless.state&0x03)<2)) { //down
+              faceless.state|=0x08; // heading down
+              faceless.state++;  // changing lane
+            }
+            else {
+              faceless.state|=0x04; //middle
+            }
+            
+          break;
+          case 5:
+            faceless.direction=!faceless.direction;
+          break;
+          case 6:
+            faceless.timer=20;
+          break;
+          case 7:
+            faceless.timer=100;
+            faceless.state &= ~(0x70); // "state" = 0            
+          break;
+        }
+        faceless.state+=0x10;
+      }
+      else { // faceless.timer is running
+        if ((0x50==(faceless.state&0x70)||(0x40==(faceless.state&0x70)))){
+          faceless.pos.x += faceless.direction? -1:1;
+          if (0==globalCounter%2)
+            faceless.pos.y -= (1-((faceless.state&0x0C)>>2));
+        }
+      }
+    }
+    if (faceless.HP>0){
+      if (true){
+        uint8_t state_temp = ((faceless.state&0x70)>>4);
+        /*if (2==state_temp){
+          sprites.drawSelfMasked(faceless.pos.x - cam.pos.x, faceless.pos.y - cam.pos.y, FiringSprite,  3*faceless.direction);
+        }*/
+        if (state_temp<3){
+          if(!((2==state_temp)&&(0==globalCounter%2)))
+            sprites.drawSelfMasked(faceless.pos.x - cam.pos.x, faceless.pos.y - cam.pos.y, kidSprite , 7 * faceless.direction);
+        }
+        else {
+          //arduboy.fillCircle(faceless.pos.x - cam.pos.x +6 , faceless.pos.y - cam.pos.y +5 ,4,0);
+          if (!((7==state_temp)&&(0==globalCounter%2)))
+            sprites.drawSelfMasked(faceless.pos.x - cam.pos.x, faceless.pos.y - cam.pos.y, FacelessSprite, 0);
+        }
+      }
+      else{
+//        sprites.drawSelfMasked(faceless.pos.x - cam.pos.x - 5 + direction, faceless.pos.y - cam.pos.y, WizardFiringSprite, direction);
+      }
+      /*if (0==wizard.state&0x07)
+        arduboy.fillCircle(wizard.pos.x - cam.pos.x  , wizard.pos.y - cam.pos.y ,5,1);
+      if (0==wizard.state&0x38)
+        arduboy.fillCircle(wizard.pos.x - cam.pos.x +2  , wizard.pos.y + 10 - cam.pos.y ,5,1);*/
+    }
+    else{
+      faceless.HP--;
+      if (arduboy.everyXFrames(2)) {
+        arduboy.fillCircle(faceless.pos.x - cam.pos.x +8 , faceless.pos.y - cam.pos.y +4 ,4,0);
+        sprites.drawSelfMasked(faceless.pos.x - cam.pos.x, faceless.pos.y - cam.pos.y, FacelessSprite, 0);
+      }
+      if (faceless.HP<-70){
+        faceless.active=false;
+      }
+    }
+  }
+
+// End of 
+  
   if (bossRoom&&(0==ennemiesLeft)){
     //LvlUp
     gameState=STATE_GAME_LVLUP;
