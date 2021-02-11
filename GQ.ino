@@ -54,6 +54,7 @@ void setup()
   //arduboy.audio.begin();
   arduboy.bootLogoSpritesSelfMasked();
   arduboy.setFrameRate(60);                                 // set the frame rate of the game at 60 fps
+  arduboy.initRandomSeed();
   loadSetEEPROM();
 }
 

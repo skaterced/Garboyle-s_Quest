@@ -71,15 +71,22 @@
 #define PLAYER_JUMP_TIME             11
 //#define PLAYER_JUMP_VELOCITY         30
 
+Arduboy2Base arduboy;
+Sprites sprites;
+//ArduboyTones sound(arduboy.audio.enabled);
+
 // This is a replacement for struct Rect in the Arduboy2 library.
 // It defines height as an int instead of a uint8_t to allow a higher rectangle.
-struct HighRect
+class HighRect
 {
   public:
     int x;
     int y;
     uint16_t width;
     int height;
+    void draw(int offX, int offY){
+      arduboy.fillRect(x-offX,y-offY,width,height);
+    }
 };
 
 class Door
@@ -93,10 +100,6 @@ class Door
       destination=99;
     }
 };
-
-Arduboy2Base arduboy;
-Sprites sprites;
-//ArduboyTones sound(arduboy.audio.enabled);
 
 uint8_t level_width_cell = 24;
 uint8_t level_height_cell = 24;

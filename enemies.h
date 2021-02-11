@@ -204,7 +204,7 @@ void enemiesInit(bool everything)
     faceless.direction=FACING_LEFT;
     faceless.state=2;
     faceless.timer=200;
-    faceless.HP=60;
+    faceless.HP=35;
     faceless.active=false; 
   // state info:         B0SSSMMLL;  
   //                      ||||||\|
@@ -363,6 +363,7 @@ void spitterCreate (vec2 pos){
 
 void enemiesUpdate()
 {
+  randomSeed(globalCounter);
   uint8_t ennemiesLeft=0;
   // Draw spikes first  
   for (byte i = MAX_PER_TYPE-1; i < MAX_PER_TYPE; --i)
@@ -721,12 +722,12 @@ void enemiesUpdate()
         //uint8_t formerPos = (faceless.state&0x07);
         uint8_t FaceRand = random(60); 
         switch ((faceless.state&0x70)>>4){
-          case 0:
-            //faceless.timer=20;
+          case 2:
+            faceless.timer=40;
           break;
           case 1:    //fire
             faceless.timer=20;
-            /*
+            /*  No more fire :( too easy if you ask me
             for (uint8_t j=0; j<MAX_PER_TYPE; j++){    // we could skip the for, only one bullet in this case... 
               if (!ennemiBullets[j].isActive){
                 ennemiBullets[j].isActive=true;
@@ -739,6 +740,7 @@ void enemiesUpdate()
                 break;
               }
             }*/
+            //end of case 2 -> transform back in a Faceless
           break;
           case 3: case 4:
             faceless.state &= 0xF3;  // mask "moving direction"
@@ -765,7 +767,7 @@ void enemiesUpdate()
           break;
           case 7:
             faceless.timer=100;
-            faceless.state &= ~(0x70); // "state" = 0            
+            faceless.state &= ~(0x70); // "state" = 0  -> transform into a Gargoyle    
           break;
         }
         faceless.state+=0x10;
@@ -805,8 +807,8 @@ void enemiesUpdate()
     else{
       faceless.HP--;
       if (arduboy.everyXFrames(2)) {
-        arduboy.fillCircle(faceless.pos.x - cam.pos.x +8 , faceless.pos.y - cam.pos.y +4 ,4,0);
-        sprites.drawSelfMasked(faceless.pos.x - cam.pos.x, faceless.pos.y - cam.pos.y, FacelessSprite, 0);
+        //arduboy.fillCircle(faceless.pos.x - cam.pos.x +8 , faceless.pos.y - cam.pos.y +4 ,4,0);
+        sprites.drawSelfMasked(faceless.pos.x - cam.pos.x, faceless.pos.y - cam.pos.y, FacelessSprite, 1);
       }
       if (faceless.HP<-70){
         faceless.active=false;

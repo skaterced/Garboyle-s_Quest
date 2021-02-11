@@ -1,4 +1,4 @@
-#ifndef INPUT_H
+ #ifndef INPUT_H
 #define INPUT_H
 
 #include <Arduino.h>
@@ -13,7 +13,7 @@ void checkInputs()
     return; // Cannot control player if dead
 
     
-  cam.offset = vec2(0, 0);
+  //cam.offset = vec2(0, 0);
   kid.isWalking = false;
   if (arduboy.pressed(DOWN_BUTTON))
   {
@@ -28,7 +28,9 @@ void checkInputs()
     if (arduboy.pressed(LEFT_BUTTON)){
     //if (!(kid.againstWall&&(FACING_LEFT == kid.direction))){      
       mapTimer = TIMER_AMOUNT;
-      cam.offset.x = CAMERA_OFFSET;
+      /*cam.offset.x+=2;
+      if (cam.offset.x > CAMERA_OFFSET)
+        cam.offset.x = CAMERA_OFFSET;*/
       kid.direction = FACING_LEFT;
       if (!(kid.isFiring)){
         if (!(kid.isJumping || kid.isFlying || kid.isLanding))
@@ -50,7 +52,9 @@ void checkInputs()
       //if (!(kid.againstWall&&(FACING_RIGHT == kid.direction)))
       {
         //mapTimer = TIMER_AMOUNT;
-        cam.offset.x = -CAMERA_OFFSET;
+        /*cam.offset.x-=2;
+        if (cam.offset.x < -CAMERA_OFFSET)
+          cam.offset.x = -CAMERA_OFFSET;*/
         kid.direction = FACING_RIGHT;
         if (!(kid.isFiring)){
           if (!(kid.isJumping || kid.isFlying || kid.isLanding))
@@ -69,11 +73,11 @@ void checkInputs()
         }
       }
     }
-    else
-      kid.againstWall = false;
+    //else
+      //kid.againstWall = false;
   }
-  else 
-    cam.offset.x = (kid.direction ? -CAMERA_OFFSET : CAMERA_OFFSET);
+  //else 
+    //cam.offset.x = (kid.direction ? CAMERA_OFFSET : -CAMERA_OFFSET);
   kid.isFiring = false;
   if (arduboy.pressed(A_BUTTON))
   {
@@ -90,39 +94,71 @@ void checkInputs()
   // Jump Button
   if (arduboy.justPressed(B_BUTTON))
   {
+    bool letsJump = false;
     if (((kid.speed.y == 0 || kid.speed.y == -GRAVITY) && kid.isJumping == false && kid.isLanding == false)||kid.isClimbing)
     {
       //sound.tone(200, 100);
-      kid.isWalking = false;
-      kid.isJumping = true;
+      kid.isWalking = false;      
       kid.jumpLetGo = false;
-      if (arduboy.pressed(DOWN_BUTTON)&&(kid.isClimbing)){
+
+      if (kid.isClimbing){
+        if (arduboy.pressed(DOWN_BUTTON)){
+          kid.isClimbing=false;
+          //kid.direction=!kid.direction; // not facing the wall when dropping it 
+        }
+        else if ((arduboy.pressed(RIGHT_BUTTON)&&(FACING_LEFT!=kid.direction)) // no jumping against the wall
+              ||(arduboy.pressed(LEFT_BUTTON)&&(FACING_RIGHT!=kid.direction))){          
+          //kid.direction=!kid.direction; // not facing the wall when dropping it 
+          letsJump=true;          
+          kid.speed.x = kid.direction? -MAX_XSPEED:MAX_XSPEED;
+        }
+        else if (!(arduboy.pressed(RIGHT_BUTTON)||arduboy.pressed(LEFT_BUTTON)))
+          letsJump=true;        
+      }
+      else { //if (!kid.isClimbing){
+        letsJump=true;
+        if (arduboy.pressed(RIGHT_BUTTON)||arduboy.pressed(LEFT_BUTTON)){
+          kid.speed.x = kid.direction? -MAX_XSPEED:MAX_XSPEED;
+        }
+      }
+      if (letsJump){
+        kid.isClimbing = false;
+        kid.isJumping = true;
+        kid.jumpTimer = PLAYER_JUMP_TIME - 4 +(jumpVelocity/10);
+        kid.speed.y = jumpVelocity;
+      }
+    }
+      
+/*      if (arduboy.pressed(DOWN_BUTTON)&&(kid.isClimbing)){
         kid.isClimbing=false;
         kid.direction=!kid.direction; // not facing the wall when dropping it 
       }
       else {
         kid.jumpTimer = PLAYER_JUMP_TIME - 4 +(jumpVelocity/10);
         kid.speed.y = jumpVelocity;
-      }
+      
       if (arduboy.pressed(RIGHT_BUTTON)){
         if (!(kid.isClimbing&&(FACING_RIGHT==kid.direction))){
           kid.speed.x = MAX_XSPEED;
         }
-        else
-          kid.againstWall=true;
+        //else
+          //kid.againstWall=true;
       }
       else if (arduboy.pressed(LEFT_BUTTON)){
         if (!(kid.isClimbing&&(FACING_LEFT==kid.direction))){
           kid.speed.x = -MAX_XSPEED;
         }
-        else
-          kid.againstWall=true;
+       // else
+          //kid.againstWall=true;
       }
+    }
       else if (kid.isClimbing){
         kid.direction=!kid.direction; // not facing the wall when jumping out of it        
       }
       kid.isClimbing = false;
     }
+*/
+    
     else if (!kid.isFlying)
     {
       if (kid.wingsJauge > 0)
@@ -140,7 +176,8 @@ void checkInputs()
   if (!arduboy.pressed(B_BUTTON))
   {
     //kid.isFlying = false;
-    if (kid.isJumping) kid.jumpLetGo = true;
+    if (kid.isJumping)
+      kid.jumpLetGo = true;
   }
 }
 

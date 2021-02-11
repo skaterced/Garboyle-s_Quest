@@ -36,7 +36,7 @@ class BossRew {
 };
 
 // defines if a lvl is a Boss lvl. Can have several reward
-class BossRew bossLevels[NB_BOSS]={BossRew(3,UPGRADE_FIRE),BossRew(3,UPGRADE_ARMOR),BossRew(2,UPGRADE_JUMP),BossRew(10,UPGRADE_WINGS),BossRew(7,UPGRADE_ARMOR),BossRew(99,0)};
+class BossRew bossLevels[NB_BOSS]={BossRew(3,UPGRADE_FIRE),BossRew(3,UPGRADE_ARMOR),BossRew(19,UPGRADE_JUMP),BossRew(10,UPGRADE_WINGS),BossRew(7,UPGRADE_ARMOR),BossRew(99,0)};
 
 void BossLvlCheck(){
   for (uint8_t i=0; i<NB_BOSS; i++){
@@ -116,9 +116,13 @@ void levelLoad(const uint8_t *lvl) {
       //indorLevel=false;
     break;
     case 5:
-      level_width_cell = 8;
+      level_width_cell = 16;
       level_height_cell = 32;
     break;
+    case 6:
+      level_width_cell = 32;
+      level_height_cell = 8;
+    break;    
     default:
       level_width_cell = 24;
       level_height_cell = 24;
@@ -343,9 +347,11 @@ void checkCollisions()
     if (bats[i].active)
     {
       HighRect ennemiRect = {.x = bats[i].pos.x, .y = bats[i].pos.y, .width = 10, .height = 8};
+      //if (0==globalCounter%2) ennemiRect.draw(cam.pos.x, cam.pos.y);
       for (uint8_t j=0; j<MAX_WEAPON; j++){
         if (kid.fireBalls[j].isActive){
-          HighRect projectileRect = {.x = kid.fireBalls[j].pos.x-firePower, .y = kid.fireBalls[j].pos.y-firePower, .width = 1+2*(firePower), .height = 1+2*(firePower)};
+          HighRect projectileRect = {.x = kid.fireBalls[j].pos.x-firePower, .y = kid.fireBalls[j].pos.y-firePower, .width = 2+2*(firePower), .height = 2+2*(firePower)};
+          //if (0==globalCounter%2) projectileRect.draw(cam.pos.x, cam.pos.y);
           if (collide(projectileRect, ennemiRect))
           {
             bats[i].HP-=firePower;
@@ -371,7 +377,7 @@ void checkCollisions()
       HighRect ennemiRect = {.x = ghosts[i].pos.x, .y = ghosts[i].pos.y, .width = 12, .height = 16};
       for (uint8_t j=0; j<MAX_WEAPON; j++){
         if (kid.fireBalls[j].isActive){
-          HighRect projectileRect = {.x = kid.fireBalls[j].pos.x-firePower, .y = kid.fireBalls[j].pos.y-firePower, .width = 1+2*(firePower), .height = 1+2*(firePower)};
+          HighRect projectileRect = {.x = kid.fireBalls[j].pos.x-firePower, .y = kid.fireBalls[j].pos.y-firePower, .width = 2+2*(firePower), .height = 2+2*(firePower)};
           if (collide(projectileRect, ennemiRect))
           {
             ghosts[i].HP-=firePower;
@@ -410,7 +416,7 @@ void checkCollisions()
     HighRect ennemiRect = {.x = sun.pos.x-8, .y = sun.pos.y-8, .width = 16, .height = 16};
     for (uint8_t j=0; j<MAX_WEAPON; j++){
       if (kid.fireBalls[j].isActive){
-        HighRect projectileRect = {.x = kid.fireBalls[j].pos.x-firePower, .y = kid.fireBalls[j].pos.y-firePower, .width = 1+2*(firePower), .height = 1+2*(firePower)};
+        HighRect projectileRect = {.x = kid.fireBalls[j].pos.x-firePower, .y = kid.fireBalls[j].pos.y-firePower, .width = 2+2*(firePower), .height = 2+2*(firePower)};
         if (collide(projectileRect, ennemiRect))
         {
           sun.HP-=firePower;
@@ -431,7 +437,7 @@ void checkCollisions()
     HighRect ennemiRect = {.x = wizard.pos.x, .y = wizard.pos.y, .width = 16, .height = 23};
     for (uint8_t j=0; j<MAX_WEAPON; j++){
       if (kid.fireBalls[j].isActive){
-        HighRect projectileRect = {.x = kid.fireBalls[j].pos.x-firePower, .y = kid.fireBalls[j].pos.y-firePower, .width = 1+2*(firePower), .height = 1+2*(firePower)};
+        HighRect projectileRect = {.x = kid.fireBalls[j].pos.x-firePower, .y = kid.fireBalls[j].pos.y-firePower, .width = 2+2*(firePower), .height = 2+2*(firePower)};
         if (collide(projectileRect, ennemiRect))
         {
           wizard.HP-=firePower;
@@ -449,10 +455,11 @@ void checkCollisions()
   }
 
   if (faceless.active){
-    HighRect ennemiRect = {.x = faceless.pos.x, .y = faceless.pos.y, .width = 16, .height = 18};
+    HighRect ennemiRect = {.x = faceless.pos.x, .y = faceless.pos.y, .width = 12, .height = 16};
+    //if (0==globalCounter%2) ennemiRect.draw(cam.pos.x, cam.pos.y);
     for (uint8_t j=0; j<MAX_WEAPON; j++){
       if (kid.fireBalls[j].isActive){
-        HighRect projectileRect = {.x = kid.fireBalls[j].pos.x-firePower, .y = kid.fireBalls[j].pos.y-firePower, .width = 1+2*(firePower), .height = 1+2*(firePower)};
+        HighRect projectileRect = {.x = kid.fireBalls[j].pos.x-firePower, .y = kid.fireBalls[j].pos.y-firePower, .width = 2+2*(firePower), .height = 2+2*(firePower)};
         if (collide(projectileRect, ennemiRect))
         {          
           kid.fireBalls[j].isActive=false;

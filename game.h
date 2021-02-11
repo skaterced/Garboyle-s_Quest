@@ -20,6 +20,7 @@ byte toneindex = 0;
 */
 void stateMenuPlayNew()
 {
+  cam.pos = vec2(0, 0);
   for (uint8_t i=0; i<NB_BOSS; i++){
     bossLevels[i].alive=true;
   }
@@ -33,31 +34,15 @@ void stateMenuPlayNew()
 
 void stateGameNextLevel()
 {
-
-  /*
-    scorePlayer=0; //bossesAlive;
-  //if (level < TOTAL_LEVELS)
-  //{
-    if (arduboy.everyXFrames(20))
-    {
- 
-    }
-
-  // Update EEPROM
-  
-  EEPROM.put(OFFSET_LEVEL, level);
-  EEPROM.put(OFFSET_COINS, totalCoins);
-  EEPROM.put(OFFSET_SCORE, scorePlayer);
-  */
-
   //toneindex = 0;
   //sound.tone(425, 20);
   setKid();
-  cam.pos = vec2(0, 0);
-  cam.pos = vec2(0, LEVEL_HEIGHT - 64);
-  cam.offset = vec2(0, 0);
+  //cam.pos = vec2(0, 0);
+  //cam.pos.y = level_height_cell*16;
+  //cam.offset = vec2(0, 0);
   enemiesInit();
   levelLoad(levels[level]);
+  globalCounter=0;  // to prevent changing level sickness ;)
   gameState = STATE_GAME_PLAYING;
 };
 
@@ -162,6 +147,7 @@ void stateGameLvlUp()
 void stateMenuPlayContinue() // load
 { 
   //stateMenuPlayNew();
+  cam.pos = vec2(0, 0);
   level = 0;
   wichEntrance=0;
   globalCounter = 0;
@@ -176,20 +162,6 @@ void stateMenuPlayContinue() // load
   }
   kid.hearts=heartsMax;
   gameState = STATE_GAME_NEXT_LEVEL;
-  /*
-  level = EEPROM.read(OFFSET_LEVEL);
-  totalCoins = EEPROM.read(OFFSET_COINS);
-  coinsCollected = 0;
-  balloonsLeft = 0;
-  //scorePlayer = 0;
-  EEPROM.get(OFFSET_SCORE, scorePlayer);
-  globalCounter = 0;
-  initKid();
-  gameState = STATE_GAME_NEXT_LEVEL;
-  scoreIsVisible = false;
-  nextLevelIsVisible = true;
-  pressKeyIsVisible = false;
-  */
 }
 
 void stateGameOver()
