@@ -1,8 +1,13 @@
-/*
-  
+/*  
   Garboyle's Quest 
-    Made from Mystic Ballon (see under) and inspired by CAPCOM "Gargoyle's Quest"
+  
+    Made by Cédric Martin
+    
+    inspired by CAPCOM "Gargoyle's Quest"
+    
+    Physics, camera, level generator and more are taken from Mystic Ballon (see under)
 
+    I hope you'll enjoy ! 
   
   
   Mystic Balloon: http://www.team-arg.org/mybl-manual.html
@@ -14,6 +19,8 @@
   2016-2018 - GAVENO - CastPixel - JO3RI - Martian220
 
   Game License: MIT : https://opensource.org/licenses/MIT
+
+  Garboyle's Quest License is also MIT
 
 */
 
@@ -35,7 +42,7 @@ typedef void (*FunctionPointer) ();
 const FunctionPointer PROGMEM  mainGameLoop[] = {
   stateMenuIntro,
   stateMenuMain,
-  stateMenuHelp,
+  stateMenuDifficulty, //stateMenuHelp,
   stateMenuPlaySelect,
   stateMenuInfo,
   stateMenuGameOver,
@@ -44,7 +51,7 @@ const FunctionPointer PROGMEM  mainGameLoop[] = {
   stateGamePause,
   stateGameLvlUp,
   stateGameOver,
-  stateMenuPlayContinue,
+  stateMenuPlayLoad,
   stateMenuPlayNew,
 };
 

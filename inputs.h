@@ -78,17 +78,24 @@ void checkInputs()
   }
   //else 
     //cam.offset.x = (kid.direction ? CAMERA_OFFSET : -CAMERA_OFFSET);
-  kid.isFiring = false;
-  if (arduboy.pressed(A_BUTTON))
+ 
+  if (arduboy.justPressed(A_BUTTON))
   {
-    if (arduboy.pressed(DOWN_BUTTON))
-      gameState = STATE_GAME_PAUSE;
-    else //if (!kid.isFlying)
-    {
-      //kid.isFlying = false;
-      kid.fire();
-      kid.isFiring = true;
-    }
+    //kid.isFlying = false;
+    kid.fire();
+    //kid.isFiring = true;
+  }
+  if (arduboy.pressed(A_BUTTON)&&(kid.shootingTimer>(SHOOT_TIMER_INIT-10)))
+  {
+    kid.isFiring = true;
+    //kid.fire();
+  }
+  else
+    kid.isFiring = false;
+    
+  if (arduboy.pressed(UP_BUTTON)&&arduboy.pressed(DOWN_BUTTON)){
+    globalCounter=65;  
+    gameState = STATE_GAME_PAUSE;
   }
   
   // Jump Button

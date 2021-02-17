@@ -7,8 +7,7 @@
 //#include "Point.h"
 #include "player.h"
 
-//change stateMenuPlayContinue() if there's more than 8 bosses
-#define NB_BOSS 6 //the last one is reserved for the cheat
+#define NB_BOSS 10 //the last one is reserved for the cheat
 /*
 #define LSTART  0
 #define LFINISH 1 << 5
@@ -36,7 +35,9 @@ class BossRew {
 };
 
 // defines if a lvl is a Boss lvl. Can have several reward
-class BossRew bossLevels[NB_BOSS]={BossRew(3,UPGRADE_FIRE),BossRew(3,UPGRADE_ARMOR),BossRew(19,UPGRADE_JUMP),BossRew(10,UPGRADE_WINGS),BossRew(7,UPGRADE_ARMOR),BossRew(99,0)};
+class BossRew bossLevels[NB_BOSS]={BossRew(3,UPGRADE_FIRE),BossRew(3,UPGRADE_ARMOR),BossRew(7,UPGRADE_ARMOR),BossRew(10,UPGRADE_WINGS),
+                                  BossRew(19,UPGRADE_JUMP),BossRew(20,UPGRADE_JUMP),BossRew(20,UPGRADE_ARMOR),BossRew(21,UPGRADE_FIRE),
+                                  BossRew(21,UPGRADE_WINGS),BossRew(99,0)};
 
 void BossLvlCheck(){
   for (uint8_t i=0; i<NB_BOSS; i++){
@@ -317,7 +318,7 @@ void checkCollisions()
       if ((collide(exitRect, playerRect) && arduboy.justPressed(UP_BUTTON) ) && false==bossRoom) //one does not simply leave the room whithout killing the Boss
       {
         //balloonsLeft = kid.hearts;
-        scoreIsVisible = true;        
+        //scoreIsVisible = true;        
         level=levelExits[i].destination&0x1F;        
         wichEntrance=((levelExits[i].destination&0xE0)>>5);
         gameState = STATE_GAME_NEXT_LEVEL;

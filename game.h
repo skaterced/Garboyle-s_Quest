@@ -64,38 +64,6 @@ void stateGamePlaying()
   checkCollisions();
 }
 
-
-void stateGamePause()
-{
-  drawKid();
-  sprites.drawSelfMasked(47, 17, badgePause, 0);
-  //bossLevels[NB_BOSS]
-  if (arduboy.justPressed(B_BUTTON)){
-    if (arduboy.pressed(LEFT_BUTTON)){ //cheat
-      bossLevels[NB_BOSS-1].alive=true;
-      bossLevels[NB_BOSS-1].lvl=level;
-      bossLevels[NB_BOSS-1].reward=UPGRADE_JUMP;
-      gameState = STATE_GAME_LVLUP;
-    }
-    else if (arduboy.pressed(RIGHT_BUTTON)){ //cheat
-      bossLevels[NB_BOSS-1].alive=true;
-      bossLevels[NB_BOSS-1].lvl=level;
-      bossLevels[NB_BOSS-1].reward=UPGRADE_WINGS;
-      gameState = STATE_GAME_LVLUP;
-    }
-    else if (arduboy.pressed(DOWN_BUTTON)){ //cheat
-      bossLevels[NB_BOSS-1].alive=true;
-      bossLevels[NB_BOSS-1].lvl=level;
-      bossLevels[NB_BOSS-1].reward=UPGRADE_FIRE;
-      gameState = STATE_GAME_LVLUP;
-    }
-  }
-  else if (arduboy.justPressed(A_BUTTON | B_BUTTON))
-  {
-    gameState = STATE_GAME_PLAYING;
-  }
-}
-
 void upgradeKid(uint8_t wichUp){
     switch (wichUp){
       case UPGRADE_JUMP:
@@ -144,7 +112,7 @@ void stateGameLvlUp()
   }
 }
 
-void stateMenuPlayContinue() // load
+void stateMenuPlayLoad()
 { 
   //stateMenuPlayNew();
   cam.pos = vec2(0, 0);
@@ -152,7 +120,10 @@ void stateMenuPlayContinue() // load
   wichEntrance=0;
   globalCounter = 0;
   initKid();  
-  uint8_t gameSlot = EEPROM.read(OFFSET_LEVEL);
+  uint16_t gameSlot;
+  //for (uint8_t j=0; j<2; j++){
+  EEPROM.get(OFFSET_DIFFICULTY, difficulty);
+  EEPROM.get(OFFSET_LEVEL, gameSlot);
   for (uint8_t i=0; i<NB_BOSS; i++){
     if (0x01==(gameSlot&0x01)){
       bossLevels[i].alive=false;
@@ -160,61 +131,88 @@ void stateMenuPlayContinue() // load
     }
     gameSlot>>=1;
   }
+  
   kid.hearts=heartsMax;
   gameState = STATE_GAME_NEXT_LEVEL;
 }
 
-void stateGameOver()
+void stateGameOver(bool showBadgeGO) // if false, means its called by pauseMenu
 {
-  sprites.drawSelfMasked(47, 17, badgeGameOver, 0);
-  if (globalCounter<70){
-    globalCounter++;
-    cont = 0;
-    if (arduboy.justPressed(B_BUTTON|A_BUTTON))
-      globalCounter=100;
+  if (showBadgeGO){
+    sprites.drawSelfMasked(47, 17, badgeGameOver, 0);
+    if (globalCounter<70){
+      globalCounter++;
+      selectDown = true;
+      if (arduboy.justPressed(B_BUTTON|A_BUTTON))
+        globalCounter=100;
+    }
   }
   else {
     sprites.drawSelfMasked(44, 45, continue_bitmap, 0);
-    if (arduboy.justPressed(DOWN_BUTTON))
-    {
-      cont = 1;
-      //sound.tone(300, 20);
-    }
-    if (arduboy.justPressed(UP_BUTTON))
-    {
-      cont = 0;
-      //sound.tone(300, 20);
-    }
-  //  sprites.drawPlusMask(58, 18 + 9 * cont, selector_plus_mask, 0);
-    arduboy.fillCircle(39, 48 + 9 * cont, 3, 1);
-    arduboy.fillCircle(39, 48 + 9 * cont, 1, 0);
+    drawSelector(39, 48);
+
     if (arduboy.justPressed(B_BUTTON|A_BUTTON))
     {
-      if (1==cont){ // save and quit
+      if (selectDown){ // save and quit
         uint8_t gameSlot = 0;
         for (uint8_t i=0; i<NB_BOSS; i++){
           if (!bossLevels[i].alive){
             gameSlot += ( 1 << i) ;            
           }          
-        }
-        EEPROM.put(OFFSET_LEVEL, (byte)gameSlot);
-        gameState = STATE_MENU_INTRO ;    
+        }        
+        EEPROM.put(OFFSET_DIFFICULTY, difficulty);
+        EEPROM.put(OFFSET_LEVEL, (uint16_t)gameSlot);
+        gameState = STATE_MENU_MAIN ;    
       }
       else { // continue
-        level=0;
-        wichEntrance=0;
-        kid.lives=3;
-        gameState = STATE_GAME_NEXT_LEVEL ;    
+        if (showBadgeGO){
+          level=0;
+          wichEntrance=0;
+          kid.lives=3;
+          gameState = STATE_GAME_NEXT_LEVEL ;    
+        }
+        else {
+          gameState = STATE_GAME_PLAYING;
+        }
       }
     }
   }
+}
 
-/*
-  if (arduboy.justPressed(A_BUTTON | B_BUTTON))
+void stateGameOver(){
+  stateGameOver(true);
+}
+
+void stateGamePause()
+{
+  //drawKid();
+  sprites.drawSelfMasked(47, 17, badgePause, 0);
+  //bossLevels[NB_BOSS]
+  stateGameOver(false);
+  if (arduboy.justPressed(B_BUTTON)){
+    if (arduboy.pressed(LEFT_BUTTON)){ //cheat
+      bossLevels[NB_BOSS-1].alive=true;
+      bossLevels[NB_BOSS-1].lvl=level;
+      bossLevels[NB_BOSS-1].reward=UPGRADE_JUMP;
+      gameState = STATE_GAME_LVLUP;
+    }
+    else if (arduboy.pressed(RIGHT_BUTTON)){ //cheat
+      bossLevels[NB_BOSS-1].alive=true;
+      bossLevels[NB_BOSS-1].lvl=level;
+      bossLevels[NB_BOSS-1].reward=UPGRADE_WINGS;
+      gameState = STATE_GAME_LVLUP;
+    }
+    else if (arduboy.pressed(DOWN_BUTTON)){ //cheat
+      bossLevels[NB_BOSS-1].alive=true;
+      bossLevels[NB_BOSS-1].lvl=level;
+      bossLevels[NB_BOSS-1].reward=UPGRADE_FIRE;
+      gameState = STATE_GAME_LVLUP;
+    }
+  }  
+  /*
+  else if (arduboy.justPressed(A_BUTTON | B_BUTTON))
   {
-    cont=0;
-    bossRoom=false;
-    gameState = STATE_MENU_GAMEOVER;
+    gameState = STATE_GAME_PLAYING;
   }*/
 }
 

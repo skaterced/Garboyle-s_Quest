@@ -48,7 +48,7 @@ struct Players
     boolean jumpLetGo;
     boolean isFiring;
     boolean isClimbing;
-    boolean againstWall;
+    //boolean againstWall;
     byte imuneTimer;
     byte jumpTimer;
     byte shootingTimer;
@@ -65,10 +65,10 @@ struct Players
           fireBalls[i].isActive=true;
           fireBalls[i].radius = firePower;
           fireBalls[i].pos.y=pos.y+4;          
-          bool dir = direction;
-          if (isClimbing) dir=!dir ;
-          fireBalls[i].actualpos.x=actualpos.x+64+(dir? 0:64);
-          fireBalls[i].speed.x= (dir? -1:1)*WEAPON_SPEED;
+          //bool dir = direction;
+          //if (isClimbing) dir=!dir ;
+          fireBalls[i].actualpos.x=actualpos.x+64+(direction? 0:64);
+          fireBalls[i].speed.x= (direction? -WEAPON_SPEED:WEAPON_SPEED);
           //fireBalls[i].speed.y=0;
           shootingTimer=SHOOT_TIMER_INIT;
           fireBalls[i].timer=SHOT_TIMER;
@@ -106,7 +106,6 @@ void setKid()
   //kid.isImune = true;
   kid.imuneTimer = 0;
   kid.jumpTimer = 0;
-  kid.shootingTimer = 0;
   kid.direction = FACING_RIGHT;
   kid.isWalking = false;
   kid.isJumping = false;
@@ -114,8 +113,9 @@ void setKid()
   kid.isFlying = false;
   kid.jumpLetGo = true;
   kid.isFiring = false;
+  kid.shootingTimer=0;
   kid.isClimbing = false;
-  kid.againstWall = false;
+  //kid.againstWall = false;
   kid.wingsJauge = 60;
 //  kid.balloonOffset = 0;
   /*for (byte i = 0; i < PLAYER_PARTICLES; ++i)
@@ -281,15 +281,16 @@ void checkKid()
       kid.speed.x = 0;
       kid.actualpos.x = ((((kid.pos.x + 6) >> 4) << 4) + ((!kid.direction) * 4)) << (FIXED_POINT);      
       if ( gridGetSolid(tx2, (kid.pos.y + 7) >> 4)&&(arduboy.pressed(RIGHT_BUTTON)||arduboy.pressed(LEFT_BUTTON))){ //shorter region         
-        if (!arduboy.pressed(DOWN_BUTTON)&&(!kid.isWalking)&&(!kid.againstWall)){   //stick to the wall          
+        if (!arduboy.pressed(DOWN_BUTTON)&&(!kid.isWalking)/*&&(!kid.againstWall)*/){   //stick to the wall          
           kid.isClimbing=true;
+          kid.direction=!kid.direction;
           kid.wingsJauge = 60;
           kid.isJumping = false;
           kid.isLanding = false;
           kid.isFlying = false;
           kid.jumpLetGo = false;
           //kid.actualpos.y = ((kid.pos.y + 8) >> 4) << (FIXED_POINT + 4); //snap to grid
-          if (0x04==(lvlSettings&0x0f)){ //slippery tile
+          if ((0x04==(lvlSettings&0x0f))||(0x08==(lvlSettings&0x0f))){ //slippery tiles
             kid.speed.y = -8;
           }
           else
@@ -312,8 +313,9 @@ void updateCamera()
   if (kid.hearts == 0)
     return;
   // Camera offset
-  if (cam.offset.x > 0) cam.offset.x--;
-  else if (cam.offset.x < 0) cam.offset.x++;
+  int8_t offsetTemp = (kid.direction ? CAMERA_OFFSET : -CAMERA_OFFSET);
+  if (cam.offset.x > offsetTemp) cam.offset.x--;
+  else if (cam.offset.x < offsetTemp) cam.offset.x++;
   if (cam.offset.y > 0) cam.offset.y--;
   else if (cam.offset.y < 0) cam.offset.y++;
 
@@ -348,9 +350,8 @@ void drawKid()
     }
 */    
     // Fall off earth
-    if (kidcam.y > 64 + (CAMERA_OFFSET * 3))
-    {
-      kid.actualpos = startPos;
+    if ((kidcam.y > 64 + (CAMERA_OFFSET * 3))&&(globalCounter>5)) // to prevent changing level sickness ;)
+    {      
       kidHurt();
       if (kid.hearts == 0)
       {
@@ -358,12 +359,13 @@ void drawKid()
         setKid();
         kid.hearts=heartsMax;
         kid.isImune = true;
-        kid.actualpos = startPos;
+        //kid.actualpos = startPos;
 
         globalCounter = 0; // in case of Game Over
         gameState = (--kid.lives==0) ? STATE_GAME_OVER : STATE_GAME_NEXT_LEVEL;  //
 
       }
+      kid.actualpos = startPos;
       //--kid.hearts;
     }
     
@@ -388,10 +390,9 @@ void drawKid()
       }
       else {
         sprites.drawErase(kidcam.x, kidcam.y, kidSprite, 14 + kid.direction );      
-        sprites.drawSelfMasked(kidcam.x, kidcam.y, kidSprite, kid.frame + 7 * kid.direction );      
+         sprites.drawSelfMasked(kidcam.x, kidcam.y, kidSprite, kid.frame + 7 * kid.direction );      
       }
     }
-
     else
     {
       sprites.drawSelfMasked(kidcam.x , kidcam.y, FiringSprite, kid.isClimbing + 2*(kid.isLanding || kid.isFlying) + 3*kid.direction);
@@ -402,6 +403,9 @@ void drawKid()
     else if (kid.isJumping||kid.isLanding ){
       sprites. drawSelfMasked(kidcam.x-8, kidcam.y,wings_bitmap,2);
     }
+    /* (test) if (difficulty){
+      arduboy.fillCircle(kidcam.x-8, kidcam.y,3,1);
+    }*/
   }
 }
 

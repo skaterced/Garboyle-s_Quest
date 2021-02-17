@@ -9,7 +9,7 @@
    start each level without
    recovering balloons.
   ----------------------------*/
-#define HARD_MODE
+//#define HARD_MODE
 //#define CHEAT 
 
 #include <Arduino.h>
@@ -20,17 +20,19 @@
 
 // EEPROM - change this address offset from the arduboy starting address if desired
 #define OFFSET_GQ_START              (EEPROM_STORAGE_SPACE_START + 336)
-#define OFFSET_LEVEL                 (OFFSET_GQ_START + sizeof(byte))
-#define OFFSET_COINS                 (OFFSET_LEVEL + sizeof(byte))
+#define OFFSET_DIFFICULTY            (OFFSET_GQ_START + sizeof(byte))
+#define OFFSET_LEVEL                 (OFFSET_DIFFICULTY + sizeof(bool))
+/*
 #define OFFSET_COINSHS               (OFFSET_COINS + sizeof(byte))
 #define OFFSET_SCORE                 (OFFSET_COINSHS + sizeof(byte))
 #define OFFSET_HSCORE                (OFFSET_SCORE + sizeof(unsigned long))
 #define OFFSET_GQ_END                (OFFSET_HSCORE + sizeof(unsigned long))
+*/
 
 //define menu states (on main menu)
 #define STATE_MENU_INTRO             0
 #define STATE_MENU_MAIN              1
-#define STATE_MENU_HELP              2
+#define STATE_MENU_DIFF              2
 #define STATE_MENU_PLAY              3
 #define STATE_MENU_INFO              4
 #define STATE_MENU_GAMEOVER          5
@@ -41,7 +43,8 @@
 #define STATE_GAME_PAUSE             8
 #define STATE_GAME_LVLUP             9
 #define STATE_GAME_OVER              10
-#define STATE_GAME_PLAYCONTNEW       11 // 11
+#define STATE_GAME_PLAYLOAD          11
+#define STATE_GAME_PLAYNEW           12
 
 #define FACING_RIGHT                 0
 #define FACING_LEFT                  1
@@ -108,15 +111,17 @@ byte gameState = STATE_MENU_MAIN;   // start the game with the TEAM a.r.g. logo
 //byte menuSelection = STATE_MENU_PLAY; // PLAY menu item is pre-selected
 byte globalCounter = 0;
 byte level;
+bool difficulty = 0; // 0 easy, 1 hard
+
 //unsigned long scorePlayer;
 //byte coinsCollected = 0;
 //byte totalCoins = 0;
 //byte balloonsLeft;
 
-boolean nextLevelIsVisible;
-boolean scoreIsVisible;
-boolean canPressButton;
-boolean pressKeyIsVisible;
+//boolean nextLevelIsVisible;
+//boolean scoreIsVisible;
+//boolean canPressButton;
+//boolean pressKeyIsVisible;
 
 //byte walkerFrame = 0;
 //byte fanFrame = 0;

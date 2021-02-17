@@ -183,36 +183,38 @@ void enemiesInit(bool everything)
     ghosts[i].HP = 12;  // 19 if "can shoot"
     ghosts[i].direction = true;
 
-    //Sun
-    sun.pos.x=0;
-    sun.pos.y=0;
-    sun.direction=0;
-    sun.HP=30;
-    sun.active=false;
-
-    //Wizard
-    wizard.pos.x=0;
-    wizard.pos.y=0;
-    wizard.state=0;
-    wizard.wiz_timer=100;
-    wizard.HP=60;
-    wizard.active=false;
-
-     //faceless
-    faceless.pos.x=0;
-    faceless.pos.y=0;
-    faceless.direction=FACING_LEFT;
-    faceless.state=2;
-    faceless.timer=200;
-    faceless.HP=35;
-    faceless.active=false; 
-  // state info:         B0SSSMMLL;  
-  //                      ||||||\|
-  //                      |\||\| └-> L: these 2 bits are used to determine the line (0 is top, 2 is bottom)
-  //                      | \| └-->  M: these 2 bits are used to determine the moving direction (0 is going up, 2 is going down)   
-  //                      |  └--->   S: these 3 bits are used to determine the state. 
-  //                      └->        not used (could be direction)
+    ennemiBullets[i].isActive=false;
   }
+    //Sun
+  sun.pos.x=0;
+  sun.pos.y=0;
+  sun.direction=0;
+  sun.HP=30;
+  sun.active=false;
+
+  //Wizard
+  wizard.pos.x=0;
+  wizard.pos.y=0;
+  wizard.state=0;
+  wizard.wiz_timer=100;
+  wizard.HP=60;
+  wizard.active=false;
+
+   //faceless
+  faceless.pos.x=0;
+  faceless.pos.y=0;
+  faceless.direction=FACING_LEFT;
+  faceless.state=2;
+  faceless.timer=200;
+  faceless.HP=35;
+  faceless.active=false; 
+// state info:         B0SSSMMLL;  
+//                      ||||||\|
+//                      |\||\| └-> L: these 2 bits are used to determine the line (0 is top, 2 is bottom)
+//                      | \| └-->  M: these 2 bits are used to determine the moving direction (0 is going up, 2 is going down)   
+//                      |  └--->   S: these 3 bits are used to determine the state. 
+//                      └->        not used (could be direction)
+
 }
 void enemiesInit(){
   enemiesInit(true);

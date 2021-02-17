@@ -14,7 +14,8 @@
 
 //byte blinkingFrames = 0;
 //byte sparkleFrames = 0;
-uint8_t cont = 0;
+//uint8_t cont = 0;
+bool selectDown = false;
 
 extern void drawNumbers(byte numbersX, byte numbersY, byte fontType, byte data);
 
@@ -32,9 +33,25 @@ void drawTitleScreen()
   */
 }
 
+void drawSelector (uint8_t x, uint8_t y){
+  if (arduboy.justPressed(DOWN_BUTTON))
+  {
+    selectDown = true;
+    //sound.tone(300, 20);
+  }
+  if (arduboy.justPressed(UP_BUTTON))
+  {
+    selectDown = false;
+    //sound.tone(300, 20);
+  }
+  // Up: 48, 21  Down: 39, 48
+  arduboy.fillCircle(x, y + 9 * selectDown, 3, 1);
+  arduboy.fillCircle(x, y + 9 * selectDown, 1, 0);  
+}
+
 void stateMenuIntro()
 {
-  globalCounter++;
+  //globalCounter++;
   drawTitleScreen();
   if (/*(globalCounter > 250) ||*/ arduboy.justPressed(A_BUTTON | B_BUTTON))
   {
@@ -45,7 +62,6 @@ void stateMenuIntro()
 
 void stateMenuMain()
 {
-
   drawTitleScreen();
   if (arduboy.justPressed(A_BUTTON | B_BUTTON))
     //gameState=STATE_GAME_PLAYCONTNEW;
@@ -71,14 +87,17 @@ void stateMenuMain()
   */
 }
 
-void stateMenuHelp()
-{/*
-  for (byte i = 0; i < 2; i++) sprites.drawSelfMasked(32, 32 * i, qrcode, i);
-  if (arduboy.justPressed(A_BUTTON | B_BUTTON))
+void stateMenuDifficulty()
+{
+  drawTitleScreen();
+  sprites.drawOverwrite(52, 17, easy_hard_bitmap, 0);
+  drawSelector(48,21);
+  if (arduboy.justPressed(B_BUTTON|A_BUTTON))
   {
-    gameState = STATE_MENU_MAIN;
-    //sound.tone(425, 20);
-  }*/
+    difficulty = selectDown;
+    gameState =  STATE_GAME_PLAYNEW;
+    selectDown = false;    
+  }
 }
 
 
@@ -132,30 +151,13 @@ void stateMenuPlaySelect()
 {
   drawTitleScreen();
   sprites.drawOverwrite(52, 17, loadMenu_bitmap, 0);
-  if (arduboy.justPressed(DOWN_BUTTON))
-  {
-    cont = 1;
-    //sound.tone(300, 20);
-  }
-  if (arduboy.justPressed(UP_BUTTON))
-  {
-    cont = 0;
-    //sound.tone(300, 20);
-  }
-//  sprites.drawPlusMask(58, 18 + 9 * cont, selector_plus_mask, 0);
-  arduboy.fillCircle(47, 22 + 9 * cont, 3, 1);
-  arduboy.fillCircle(47, 22 + 9 * cont, 1, 0);
+  drawSelector(48,21);
   if (arduboy.justPressed(B_BUTTON|A_BUTTON))
   {
-    gameState = STATE_GAME_PLAYCONTNEW + 1 - cont;
-    cont = 0;
+    gameState = selectDown? STATE_GAME_PLAYLOAD:STATE_MENU_DIFF;
+    selectDown = false;
     //sound.tone(425, 20);
   }
-  /*if (arduboy.justPressed())
-  {
-    gameState = STATE_MENU_MAIN;
-    //sound.tone(425, 20);
-  }*/
 }
 
 
