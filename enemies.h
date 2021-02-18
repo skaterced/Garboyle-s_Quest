@@ -706,7 +706,10 @@ void enemiesUpdate()
         sprites.drawSelfMasked(wizard.pos.x - cam.pos.x, wizard.pos.y - cam.pos.y, WizardSprite, 1);
       }
       if (wizard.HP<-70){
-        wizard.active=false;
+        wizard.active=false; // useless...
+        finalBossBeaten=true;
+        globalCounter=0;
+        gameState=STATE_MENU_INTRO;
       }
     }
   }

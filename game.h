@@ -28,6 +28,8 @@ void stateMenuPlayNew()
   wichEntrance=0;
   globalCounter = 0;
   initKid();
+  if (!difficulty)
+    firePower++;
   gameState = STATE_GAME_NEXT_LEVEL;
 }
 
@@ -102,12 +104,16 @@ void stateGameLvlUp()
   sprites.drawSelfMasked(60, 12, BadgeLevelUp, 0);  
   if (arduboy.justPressed(A_BUTTON | B_BUTTON))
   {    
-    upgradeKid(wichUp);
-    
+    upgradeKid(wichUp);    
     bossRoom=false;
     kid.hearts=heartsMax;
     if (0==getBossReward(true)){
       gameState = STATE_GAME_PLAYING;
+      #ifdef BOSS_RUSH
+        level=0;
+        wichEntrance=0;
+        gameState = STATE_GAME_NEXT_LEVEL;
+      #endif 
     }
   }
 }
@@ -123,6 +129,8 @@ void stateMenuPlayLoad()
   uint16_t gameSlot;
   //for (uint8_t j=0; j<2; j++){
   EEPROM.get(OFFSET_DIFFICULTY, difficulty);
+  if (!difficulty)
+    firePower++;
   EEPROM.get(OFFSET_LEVEL, gameSlot);
   for (uint8_t i=0; i<NB_BOSS; i++){
     if (0x01==(gameSlot&0x01)){
@@ -140,43 +148,42 @@ void stateGameOver(bool showBadgeGO) // if false, means its called by pauseMenu
 {
   if (showBadgeGO){
     sprites.drawSelfMasked(47, 17, badgeGameOver, 0);
-    if (globalCounter<70){
+  }
+    if (globalCounter<30){ //why all that already? to prevent quit by mistake I guess...
       globalCounter++;
-      selectDown = true;
+      selectDown=false;   
       if (arduboy.justPressed(B_BUTTON|A_BUTTON))
         globalCounter=100;
     }
-  }
-  else {
-    sprites.drawSelfMasked(44, 45, continue_bitmap, 0);
-    drawSelector(39, 48);
+  sprites.drawSelfMasked(44, 45, continue_bitmap, 0);
+  drawSelector(39, 48);
 
-    if (arduboy.justPressed(B_BUTTON|A_BUTTON))
-    {
-      if (selectDown){ // save and quit
-        uint8_t gameSlot = 0;
-        for (uint8_t i=0; i<NB_BOSS; i++){
-          if (!bossLevels[i].alive){
-            gameSlot += ( 1 << i) ;            
-          }          
-        }        
-        EEPROM.put(OFFSET_DIFFICULTY, difficulty);
-        EEPROM.put(OFFSET_LEVEL, (uint16_t)gameSlot);
-        gameState = STATE_MENU_MAIN ;    
+  if (arduboy.justPressed(B_BUTTON|A_BUTTON))
+  {
+    if (selectDown){ // save and quit
+      uint8_t gameSlot = 0;
+      for (uint8_t i=0; i<NB_BOSS; i++){
+        if (!bossLevels[i].alive){
+          gameSlot += ( 1 << i) ;            
+        }          
+      }        
+      EEPROM.put(OFFSET_DIFFICULTY, difficulty);
+      EEPROM.put(OFFSET_LEVEL, (uint16_t)gameSlot);
+      gameState = STATE_MENU_INTRO ;    
+    }
+    else { // continue
+      if (showBadgeGO){
+        level=0;
+        bossRoom=false;
+        wichEntrance=0;
+        kid.lives=3;
+        gameState = STATE_GAME_NEXT_LEVEL ;    
       }
-      else { // continue
-        if (showBadgeGO){
-          level=0;
-          wichEntrance=0;
-          kid.lives=3;
-          gameState = STATE_GAME_NEXT_LEVEL ;    
-        }
-        else {
-          gameState = STATE_GAME_PLAYING;
-        }
+      else {
+        gameState = STATE_GAME_PLAYING;
       }
     }
-  }
+  }  
 }
 
 void stateGameOver(){

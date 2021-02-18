@@ -35,9 +35,9 @@ class BossRew {
 };
 
 // defines if a lvl is a Boss lvl. Can have several reward
-class BossRew bossLevels[NB_BOSS]={BossRew(3,UPGRADE_FIRE),BossRew(3,UPGRADE_ARMOR),BossRew(7,UPGRADE_ARMOR),BossRew(10,UPGRADE_WINGS),
-                                  BossRew(19,UPGRADE_JUMP),BossRew(20,UPGRADE_JUMP),BossRew(20,UPGRADE_ARMOR),BossRew(21,UPGRADE_FIRE),
-                                  BossRew(21,UPGRADE_WINGS),BossRew(99,0)};
+class BossRew bossLevels[NB_BOSS]={BossRew(3,UPGRADE_FIRE),BossRew(3,UPGRADE_ARMOR),BossRew(10,UPGRADE_WINGS),
+                                  BossRew(19,UPGRADE_JUMP),BossRew(20,UPGRADE_JUMP),BossRew(20,UPGRADE_ARMOR),BossRew(21,UPGRADE_FIRE),                                  
+                                  BossRew(21,UPGRADE_WINGS),BossRew(24,UPGRADE_WINGS),BossRew(99,0)};
 
 void BossLvlCheck(){
   for (uint8_t i=0; i<NB_BOSS; i++){
@@ -94,11 +94,15 @@ void levelLoad(const uint8_t *lvl) {
   
   byte i = 0;
   lvlSettings=pgm_read_byte(lvl);
+  /*
   if (0x80==(lvlSettings&0x80))
     indorLevel=false;
   else
     indorLevel=true; //most of them will be I guess
-  switch((lvlSettings&0x70)>>4){
+    */
+  indorLevel=true;
+  switch((lvlSettings&0xF0)>>4){
+
     case 1:
       level_width_cell = 8;
       level_height_cell = 8;
@@ -111,6 +115,8 @@ void levelLoad(const uint8_t *lvl) {
       level_width_cell = 24;
       level_height_cell = 16;
     break;
+    case 12:
+      indorLevel=false;
     case 4:
       level_width_cell = 32;
       level_height_cell = 16;
@@ -120,11 +126,24 @@ void levelLoad(const uint8_t *lvl) {
       level_width_cell = 16;
       level_height_cell = 32;
     break;
+    case 14:
+      indorLevel=false;
     case 6:
       level_width_cell = 32;
       level_height_cell = 8;
-    break;    
-    default:
+    break;
+    case 7:
+      level_width_cell = 8;
+      level_height_cell = 32;
+    break;
+    case 9:
+      indorLevel=false;
+      level_width_cell = 24;
+      level_height_cell = 8;
+    break;
+    case 8:
+      indorLevel=false;
+    default: //mostly 0
       level_width_cell = 24;
       level_height_cell = 24;
       //indorLevel=false;
@@ -302,15 +321,6 @@ void checkCollisions()
   HighRect playerRect = {.x = kid.pos.x + 2, .y = kid.pos.y + 2, .width = 8, .height = 12};
   //HighRect playerSuckRect = {.x = kid.pos.x + ((kid.direction ^ 1) * 16) - (kid.direction * 16), .y = kid.pos.y + 2, .width = 16, .height = 14};
 
-  // Key
-/*  HighRect keyRect = {.x = key.pos.x, .y = key.pos.y, .width = 8, .height = 16};
-  if (collide(keyRect, playerRect) && key.active)
-  {
-    key.active = false;
-    key.haveKey = true;
-    //sound.tone(420, 200);
-  }*/
-  
   // Level exit
   for (uint8_t i=0; i<MAX_DOORS ; i++){
     if (-1!=levelExits[i].pos.y){

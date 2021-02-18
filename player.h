@@ -63,7 +63,7 @@ struct Players
       for (uint8_t i=0; i<MAX_WEAPON; i++){
         if ((!fireBalls[i].isActive)&&(0==shootingTimer)){
           fireBalls[i].isActive=true;
-          fireBalls[i].radius = firePower;
+          fireBalls[i].radius = firePower - !difficulty; // if difficulty is false (easy) firepower will get bigger for the same radius
           fireBalls[i].pos.y=pos.y+4;          
           //bool dir = direction;
           //if (isClimbing) dir=!dir ;

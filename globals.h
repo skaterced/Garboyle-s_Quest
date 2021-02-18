@@ -1,17 +1,6 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-/*-----------------------------*
-   To turn on hard mode
-   uncomment the below define.
-
-   Hard mode makes it so you
-   start each level without
-   recovering balloons.
-  ----------------------------*/
-//#define HARD_MODE
-//#define CHEAT 
-
 #include <Arduino.h>
 #include <Arduboy2.h>
 //#include <ArduboyTones.h>
@@ -107,11 +96,12 @@ class Door
 uint8_t level_width_cell = 24;
 uint8_t level_height_cell = 24;
 
-byte gameState = STATE_MENU_MAIN;   // start the game with the TEAM a.r.g. logo
+byte gameState = STATE_MENU_INTRO;   // start the game with the TEAM a.r.g. logo
 //byte menuSelection = STATE_MENU_PLAY; // PLAY menu item is pre-selected
-byte globalCounter = 0;
+uint8_t globalCounter = 0;
 byte level;
 bool difficulty = 0; // 0 easy, 1 hard
+bool finalBossBeaten = false;
 
 //unsigned long scorePlayer;
 //byte coinsCollected = 0;

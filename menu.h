@@ -22,6 +22,14 @@ extern void drawNumbers(byte numbersX, byte numbersY, byte fontType, byte data);
 void drawTitleScreen()
 {
   sprites.drawSelfMasked(0,0, titleScreen, 0);
+  if (finalBossBeaten){
+    arduboy.fillRect(16,44,91,19); //28466 ->28500
+    sprites.drawOverwrite(18,45, Title_end_bitmap, 0);
+    if (++globalCounter>0xF8){
+      sprites.drawOverwrite(55,14, cligne_bitmap, 0);
+    }
+  }
+  
   /*
   if (arduboy.everyXFrames(8))blinkingFrames = (++blinkingFrames) % 32;
   for (byte i = 0; i < 4; i++) sprites.drawSelfMasked(32 * i, 0, titleScreen, i);
@@ -65,6 +73,7 @@ void stateMenuMain()
   drawTitleScreen();
   if (arduboy.justPressed(A_BUTTON | B_BUTTON))
     //gameState=STATE_GAME_PLAYCONTNEW;
+    selectDown = false;
     gameState=STATE_MENU_PLAY;
   /*
   sprites.drawOverwrite(101, 9, mainMenu, 0);
