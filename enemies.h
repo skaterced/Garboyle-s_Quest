@@ -160,11 +160,6 @@ void enemiesInit(bool everything)
       traps[i].pos.y=0;
       traps[i].active=false;
 
-      /*
-      // Coins
-      coins[i].pos.x = 0;
-      coins[i].pos.y = 0;
-      coins[i].active = false;*/
     }
     
     // Bats
@@ -197,7 +192,7 @@ void enemiesInit(bool everything)
   wizard.pos.y=0;
   wizard.state=0;
   wizard.wiz_timer=100;
-  wizard.HP=60;
+  wizard.HP=80;
   wizard.active=false;
 
    //faceless
@@ -364,8 +359,7 @@ void spitterCreate (vec2 pos){
 }
 
 void enemiesUpdate()
-{
-  randomSeed(globalCounter);
+{  
   uint8_t ennemiesLeft=0;
   // Draw spikes first  
   for (byte i = MAX_PER_TYPE-1; i < MAX_PER_TYPE; --i)
@@ -516,9 +510,9 @@ void enemiesUpdate()
   if (sun.active)
   {
     ennemiesLeft++;
-    HighRect ennemiRect = {.x = sun.pos.x-8, .y = sun.pos.y-8, .width = 100, .height = 70};
+    //HighRect ennemiRect = {.x = sun.pos.x-8, .y = sun.pos.y-8, .width = 100, .height = 70};
     HighRect kidPoint = {.x=kid.pos.x, .y=kid.pos.y, .width=100,.height=70}; 
-    if (collide(kidPoint,ennemiRect) && sun.HP > 0){        
+    if (/*collide(kidPoint,ennemiRect) && */ sun.HP > 0){        
       if (0==globalCounter%3){
         sun.pos.x+=circleMove[sun.direction];
         sun.pos.y+=circleMove[(sun.direction+4)%16];
@@ -559,9 +553,9 @@ void enemiesUpdate()
   {
     bool direction = (wizard.pos.x<kid.pos.x);
     ennemiesLeft++;
-    HighRect ennemiRect = {.x = wizard.pos.x, .y = wizard.pos.y, .width = 100, .height = 70};
+    //HighRect ennemiRect = {.x = wizard.pos.x, .y = wizard.pos.y, .width = 100, .height = 70};
     HighRect kidPoint = {.x=kid.pos.x, .y=kid.pos.y, .width=100,.height=70}; 
-    if (collide(kidPoint,ennemiRect) && wizard.HP > 0){   
+    if (/*collide(kidPoint,ennemiRect) &&*/ wizard.HP > 0){   
       //uint8_t wizRand = random(100);      
       if (--wizard.wiz_timer==0){
         uint8_t wizRand = random(100);
@@ -643,7 +637,24 @@ void enemiesUpdate()
         }
       }
       else { // wiz_timer is running
-        if (0!=(wizard.state&0x80)&&(wizard.wiz_timer==50)){
+        if (0!=(wizard.state&0x80)&&(wizard.wiz_timer<90)){
+          int lightningX=wizard.pos.x-cam.pos.x+5*direction;
+          int lightningY=wizard.pos.y-cam.pos.y+9;
+          bool up = (0==globalCounter%2);
+          for (uint8_t i=0; i<20; i++){
+            int lightningNextX=lightningX+(direction? 1:-1)*(4+random(10));
+            int lightningNextY=lightningY+(up? -1:1)*(2+random(4));
+            arduboy.drawLine(lightningX,lightningY,lightningNextX,lightningNextY);
+            lightningX = lightningNextX;
+            lightningY = lightningNextY;
+            up=!up;
+          }
+          // todo, check collision with kid here
+          if ((kid.pos.y > (wizard.pos.y-8))&&(kid.pos.y < (wizard.pos.y+12)) && (!kid.isImune))  {
+            kidHurt();         
+          }
+          
+          /*
           for (uint8_t j=0; j<MAX_PER_TYPE; j++){              
               if (!ennemiBullets[j].isActive){
                 ennemiBullets[j].isActive=true;
@@ -656,7 +667,7 @@ void enemiesUpdate()
                 ennemiBullets[j].timer=SHOT_TIMER;
                 break;
               }
-            }
+            }*/
         }
         if (0==globalCounter%2){
           switch ((wizard.state&0x38)>>3) { //moving

@@ -91,6 +91,7 @@ void clearExits(){
 
 void levelLoad(const uint8_t *lvl) {
   clearExits();
+  randomSeed(globalCounter); // for the Bosses
   
   byte i = 0;
   lvlSettings=pgm_read_byte(lvl);
@@ -254,12 +255,20 @@ void levelLoad(const uint8_t *lvl) {
 void drawGrid() {
   //Serial.println("Start of tile drawing");
   int spacing = 16;
+  //bool temp=((globalCounter&0x02)>>1); // ooh Shiny
+  uint8_t backGround;
+  if (!indorLevel){
+    backGround = 14 + ((globalCounter&0x02)>>1);
+  }
+  else
+    backGround = 14+ (level%3) ;
+    
   for (byte x = 8; x < 9; --x)
   {
       for (byte y = 5; y < 6; --y)
       {
             //sprites.drawSelfMasked(x * spacing - (cam.pos.x >> 2) % spacing, (int)y * spacing - (cam.pos.y >> 2) % spacing, tileSetTwo, 16);
-            sprites.drawSelfMasked(x * spacing - (cam.pos.x >> 2) % spacing, (int)y * spacing - ((cam.pos.y + 64) >> 2) % spacing, tileSetTwo, 16);
+            sprites.drawSelfMasked(x * spacing - (cam.pos.x >> 2) % spacing, (int)y * spacing - ((cam.pos.y + 64) >> 2) % spacing, tileSetTwo, backGround );
       }
   }
   for ( int x = (cam.pos.x >> 4); x <= (cam.pos.x >> 4) + 8; ++x)
@@ -409,7 +418,9 @@ void checkCollisions()
     }
     //bullets
     if (ennemiBullets[i].isActive){
-      HighRect ennemiProjectileRect = {.x = ennemiBullets[i].pos.x, .y = ennemiBullets[i].pos.y, .width = 3, .height = 3};
+      
+      HighRect ennemiProjectileRect = {.x = ennemiBullets[i].pos.x-ennemiBullets[i].radius, .y = ennemiBullets[i].pos.y-ennemiBullets[i].radius, .width = 3+2*ennemiBullets[i].radius, .height = 3+2*ennemiBullets[i].radius};
+      //if (0==globalCounter%2)            ennemiProjectileRect.draw(cam.pos.x,cam.pos.y);
       if (collide(playerRect, ennemiProjectileRect) && !kid.isImune){
         kidHurt();
         ennemiBullets[i].isActive=false;
@@ -425,6 +436,7 @@ void checkCollisions()
   
   if (sun.active){
     HighRect ennemiRect = {.x = sun.pos.x-8, .y = sun.pos.y-8, .width = 16, .height = 16};
+    //if (0==globalCounter%2) ennemiRect.draw(cam.pos.x, cam.pos.y);
     for (uint8_t j=0; j<MAX_WEAPON; j++){
       if (kid.fireBalls[j].isActive){
         HighRect projectileRect = {.x = kid.fireBalls[j].pos.x-firePower, .y = kid.fireBalls[j].pos.y-firePower, .width = 2+2*(firePower), .height = 2+2*(firePower)};

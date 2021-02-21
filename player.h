@@ -18,7 +18,7 @@
 #define MAX_XSPEED_FAN 54
 #define MAX_YSPEED 3 * (1 << FIXED_POINT)
 #define CAMERA_OFFSET 20 //16
-#define SHOOT_TIMER_INIT 40
+#define SHOOT_TIMER_INIT 35
 
 extern bool gridGetSolid(int8_t x, int8_t y);
 extern void kidHurt();
@@ -88,10 +88,10 @@ void initKid(void){
   bossRoom=false;
   kid.hearts = 3;
   kid.lives =3;
-  wingLvl=1;
-  jumpVelocity=30;
-  firePower = 1;
-  heartsMax = 3; // (armor)
+  wingLvl=1;//1;
+  jumpVelocity=30;//30;
+  firePower = 1;//1;
+  heartsMax = 3;//3; // (armor)
 }
 
 void setKid()
@@ -331,7 +331,8 @@ void updateCamera()
 
   cam.pos += V;
   //cam.pos.y = min(464, cam.pos.y); //320 for 24x24
-  cam.pos.y = min(indorLevel? 464:320, cam.pos.y);
+  //cam.pos.y = min(indorLevel? 464:320, cam.pos.y);
+  cam.pos.y = min((LEVEL_HEIGHT_CELLS-4+indorLevel)*16, cam.pos.y);
 }
 
 void drawKid()
@@ -360,9 +361,16 @@ void drawKid()
         kid.hearts=heartsMax;
         kid.isImune = true;
         //kid.actualpos = startPos;
-
-        globalCounter = 0; // in case of Game Over
-        gameState = (--kid.lives==0) ? STATE_GAME_OVER : STATE_GAME_NEXT_LEVEL;  //
+       
+        if (--kid.lives==0){
+          globalCounter = 0;
+          gameState = STATE_GAME_OVER; // either we save and that increase deathToll, or we don't care
+        }
+        else { 
+          deathToll++;
+          gameState = STATE_GAME_NEXT_LEVEL;
+        }
+        //gameState = (--kid.lives==0) ? STATE_GAME_OVER : STATE_GAME_NEXT_LEVEL;  //
 
       }
       kid.actualpos = startPos;

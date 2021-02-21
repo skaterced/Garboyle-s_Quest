@@ -15,7 +15,8 @@
   Down        : look down
   Up + Down   : Pause Game -> can save and return to main menu
   A           : Shoot
-  B           : Jump / fly / stop flying
+  B           : Jump / Fly / Stop Flying
+  ????        : Secret Level Up
 
   When you jump against a wall, you will hang on to it. There you can:
   - Shoot with A

@@ -7,10 +7,12 @@
 #include "vec2.h"
 #include "bitmaps.h"
 
+
 // EEPROM - change this address offset from the arduboy starting address if desired
 #define OFFSET_GQ_START              (EEPROM_STORAGE_SPACE_START + 336)
 #define OFFSET_DIFFICULTY            (OFFSET_GQ_START + sizeof(byte))
 #define OFFSET_LEVEL                 (OFFSET_DIFFICULTY + sizeof(bool))
+#define OFFSET_DEATH                 (OFFSET_LEVEL + sizeof(uint16_t))
 /*
 #define OFFSET_COINSHS               (OFFSET_COINS + sizeof(byte))
 #define OFFSET_SCORE                 (OFFSET_COINSHS + sizeof(byte))
@@ -103,20 +105,6 @@ byte level;
 bool difficulty = 0; // 0 easy, 1 hard
 bool finalBossBeaten = false;
 
-//unsigned long scorePlayer;
-//byte coinsCollected = 0;
-//byte totalCoins = 0;
-//byte balloonsLeft;
-
-//boolean nextLevelIsVisible;
-//boolean scoreIsVisible;
-//boolean canPressButton;
-//boolean pressKeyIsVisible;
-
-//byte walkerFrame = 0;
-//byte fanFrame = 0;
-//byte coinFrame = 0;
-//byte coinsActive = 0;
 Door levelExits [MAX_DOORS];
 uint8_t wichEntrance = 0;
 vec2 startPos = vec2(12,12);
@@ -131,12 +119,16 @@ uint8_t jumpVelocity=30;
 uint8_t firePower =5;
 uint8_t heartsMax = 3; // (armor)
 
+uint8_t deathToll = 0;
+
 void loadSetEEPROM()
 {
   if (EEPROM.read(OFFSET_GQ_START) != GAME_ID) //&& (EEPROM.read(OFFSET_GQ_END) != GAME_ID))
   {
     EEPROM.put(OFFSET_GQ_START, (byte)GAME_ID); // game id
-    EEPROM.put(OFFSET_LEVEL, (byte)0); // beginning level
+    EEPROM.put(OFFSET_DIFFICULTY, difficulty);
+    EEPROM.put(OFFSET_LEVEL, (uint16_t)0);
+    EEPROM.put(OFFSET_DEATH, (uint8_t)0);
     /*
     EEPROM.put(OFFSET_COINS, (byte)0); // coins current run
     EEPROM.put(OFFSET_COINSHS, (byte)0); // coins highscore run

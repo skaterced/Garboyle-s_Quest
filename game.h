@@ -28,6 +28,7 @@ void stateMenuPlayNew()
   wichEntrance=0;
   globalCounter = 0;
   initKid();
+  deathToll=0;
   if (!difficulty)
     firePower++;
   gameState = STATE_GAME_NEXT_LEVEL;
@@ -139,6 +140,7 @@ void stateMenuPlayLoad()
     }
     gameSlot>>=1;
   }
+  EEPROM.get(OFFSET_DEATH, deathToll);  
   
   kid.hearts=heartsMax;
   gameState = STATE_GAME_NEXT_LEVEL;
@@ -159,9 +161,9 @@ void stateGameOver(bool showBadgeGO) // if false, means its called by pauseMenu
   drawSelector(39, 48);
 
   if (arduboy.justPressed(B_BUTTON|A_BUTTON))
-  {
+  {    
     if (selectDown){ // save and quit
-      uint8_t gameSlot = 0;
+      uint16_t gameSlot = 0;
       for (uint8_t i=0; i<NB_BOSS; i++){
         if (!bossLevels[i].alive){
           gameSlot += ( 1 << i) ;            
@@ -169,6 +171,7 @@ void stateGameOver(bool showBadgeGO) // if false, means its called by pauseMenu
       }        
       EEPROM.put(OFFSET_DIFFICULTY, difficulty);
       EEPROM.put(OFFSET_LEVEL, (uint16_t)gameSlot);
+      EEPROM.put(OFFSET_DEATH, (uint8_t)(++deathToll));
       gameState = STATE_MENU_INTRO ;    
     }
     else { // continue
@@ -177,6 +180,7 @@ void stateGameOver(bool showBadgeGO) // if false, means its called by pauseMenu
         bossRoom=false;
         wichEntrance=0;
         kid.lives=3;
+        deathToll++;
         gameState = STATE_GAME_NEXT_LEVEL ;    
       }
       else {
