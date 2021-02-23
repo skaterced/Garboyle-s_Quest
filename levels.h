@@ -151,14 +151,16 @@ void levelLoad(const uint8_t *lvl) {
   }
   lvl += 1 + (LEVEL_ARRAY_SIZE >> 3);
 
-  byte b = pgm_read_byte(lvl+i);
+  byte rEEad = pgm_read_byte(lvl+i++);
   
-  while (b != 0xFF)
+  while (rEEad != 0xFF)
   {
     byte id, x, y;  //h?
-    id = pgm_read_byte(lvl + i) & 0xE0;
-    y = (pgm_read_byte(lvl + i++) & 0x1F);
-    x = pgm_read_byte(lvl + i++) & 0x1F;
+    id = rEEad & 0xE0;
+    y = rEEad  & 0x1F;
+    rEEad = pgm_read_byte(lvl + i++);
+    uint8_t option = (rEEad & 0xE0)>>5 ;
+    x = rEEad & 0x1F;
     switch ( id )
     {
       case LSTART:
@@ -193,13 +195,16 @@ void levelLoad(const uint8_t *lvl) {
       case LBOSS:
         {
           // Boss
-          uint8_t temp = (pgm_read_byte(lvl + (i - 1))&0xE0)>>5;
-          switch (temp) {
+          switch (option) {
             case 0:
               ghostsCreate(vec2(x, y),false);
               break;
             case 1:
               ghostsCreate(vec2(x, y),true); //can fire
+              break;
+            case 2:
+              if (difficulty)
+                ghostsCreate(vec2(x, y),false); //only in Hard mode
               break;
             case 3:
               sunCreate(vec2(x,y));
@@ -216,12 +221,13 @@ void levelLoad(const uint8_t *lvl) {
       case LSPIKES:
         {
           // Spikes
-          spikesCreate(vec2(x, y), pgm_read_byte(lvl + (i - 1)) >> 5);
+          spikesCreate(vec2(x, y), option);
         }
         break;
       case LTRAP:
       {
-        spitterCreate(vec2(x, y));
+        if ((!option)||difficulty) //only in Hard mode if option !=0
+          spitterCreate(vec2(x, y));
       }
       break;
       case LCOIN:
@@ -240,7 +246,7 @@ void levelLoad(const uint8_t *lvl) {
         //break;
     }
 
-    b = pgm_read_byte(lvl + i);
+    rEEad = pgm_read_byte(lvl + i++);
   }
   if (wichEntrance>0){ // must start in an exit
     //startPos=levelExits[wichEntrance-1].pos;
@@ -253,12 +259,12 @@ void levelLoad(const uint8_t *lvl) {
 }
 
 void drawGrid() {
-  //Serial.println("Start of tile drawing");
+
   int spacing = 16;
-  //bool temp=((globalCounter&0x02)>>1); // ooh Shiny
+  
   uint8_t backGround;
   if (!indorLevel){
-    backGround = 14 + ((globalCounter&0x02)>>1);
+    backGround = 14 + (globalCounter%3);
   }
   else
     backGround = 14+ (level%3) ;
@@ -294,37 +300,22 @@ void drawGrid() {
     }
   }
 }
-
-void windNoise()
-{
-  //if (arduboy.everyXFrames(2)) sound.tone(320 + random(20), 30);
-}
-
 void kidHurt()
 {
   if (kid.hearts == 0)
     return;
-  /*if (kid.hearts == 1)
-  {
-    // dead
-    gameState = STATE_GAME_OVER;
-  }
-  else
-  {*/
-  #ifndef CHEAT
+
     kid.isFlying = false;
     kid.isClimbing = false;
     kid.hearts--;
     //sound.tone(420, 100);
     kid.isImune = true;
     kid.imuneTimer = 0;
-  //}
-  #endif
 }
 
 void checkCollisions()
 {
-  if (kid.hearts == 0)
+  if ((kid.isImune)||(kid.hearts == 0))
     return;
 
   HighRect playerRect = {.x = kid.pos.x + 2, .y = kid.pos.y + 2, .width = 8, .height = 12};

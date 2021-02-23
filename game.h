@@ -164,7 +164,7 @@ void stateGameOver(bool showBadgeGO) // if false, means its called by pauseMenu
   {    
     if (selectDown){ // save and quit
       uint16_t gameSlot = 0;
-      for (uint8_t i=0; i<NB_BOSS; i++){
+      for (uint8_t i=0; i<NB_BOSS-1; i++){ //the last is for cheat
         if (!bossLevels[i].alive){
           gameSlot += ( 1 << i) ;            
         }          

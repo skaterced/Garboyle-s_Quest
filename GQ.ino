@@ -3,7 +3,7 @@
   
     Made by Cédric Martin 2020 - 2021    
     inspired by CAPCOM "Gargoyle's Quest"    
-    Physics, camera, level generator and more are taken from Mystic Ballon (see under)
+    Architecture, Parallax, Physics, camera, and more are taken from Mystic Ballon (see under)
 
     I hope you'll enjoy ! 
 
@@ -50,25 +50,6 @@
 #include "elements.h"
 #include "levels.h"
 
-
-typedef void (*FunctionPointer) ();
-
-const FunctionPointer PROGMEM  mainGameLoop[] = {
-  stateMenuIntro,
-  stateMenuMain,
-  stateMenuDifficulty, //stateMenuHelp,
-  stateMenuPlaySelect,
-  stateMenuInfo,
-  stateMenuGameOver,
-  stateGameNextLevel,
-  stateGamePlaying,
-  stateGamePause,
-  stateGameLvlUp,
-  stateGameOver,
-  stateMenuPlayLoad,
-  stateMenuPlayNew,
-};
-
 void setup()
 {
   arduboy.boot();                                           // begin with the boot logo en setting up the device to work
@@ -84,6 +65,63 @@ void loop() {
   //if (gameState < STATE_GAME_NEXT_LEVEL && arduboy.everyXFrames(10))sparkleFrames = (++sparkleFrames) % 5;
   arduboy.pollButtons();
   arduboy.clear();
-  ((FunctionPointer) pgm_read_word (&mainGameLoop[gameState]))();
+  updateState();
   arduboy.display();
+}
+
+void updateState() {  
+  switch(gameState)
+  {
+    case STATE_MENU_INTRO:
+      stateMenuIntro();
+      break;
+
+    case STATE_MENU_MAIN:
+      stateMenuMain();
+      break;
+
+    case STATE_MENU_DIFF:
+      stateMenuDifficulty();
+      break;
+
+    case STATE_MENU_PLAY:
+      stateMenuPlaySelect();
+      break;
+
+    case STATE_MENU_INFO:
+      stateMenuInfo();
+      break;
+
+    case STATE_MENU_GAMEOVER:
+      stateMenuGameOver();
+      break;
+
+    case STATE_GAME_NEXT_LEVEL:
+      stateGameNextLevel();
+      break;
+
+    case STATE_GAME_PLAYING:
+      stateGamePlaying();
+      break;
+
+    case STATE_GAME_PAUSE:
+      stateGamePause();
+      break;
+
+    case STATE_GAME_LVLUP:
+      stateGameLvlUp();
+      break;
+
+    case STATE_GAME_OVER:
+      stateGameOver();
+      break;
+
+    case STATE_GAME_PLAYLOAD:
+      stateMenuPlayLoad();
+      break;
+
+    case STATE_GAME_PLAYNEW:
+      stateMenuPlayNew();
+      break;
+  }
 }

@@ -808,8 +808,10 @@ void enemiesUpdate()
         }
         else {
           //arduboy.fillCircle(faceless.pos.x - cam.pos.x +6 , faceless.pos.y - cam.pos.y +5 ,4,0);
-          if (!((7==state_temp)&&(0==globalCounter%2)))
+          if (!((7==state_temp)&&(0==globalCounter%2))){
+            sprites.drawErase(faceless.pos.x - cam.pos.x, faceless.pos.y - cam.pos.y, FacelessSprite, 2);
             sprites.drawSelfMasked(faceless.pos.x - cam.pos.x, faceless.pos.y - cam.pos.y, FacelessSprite, 0);
+          }
         }
       }
       else{

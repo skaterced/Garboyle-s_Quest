@@ -24,9 +24,12 @@ void drawTitleScreen()
   sprites.drawSelfMasked(0,0, titleScreen, 0);
   if (finalBossBeaten){
     arduboy.fillRect(16,44,91,19); //28466 ->28500
-    sprites.drawOverwrite(18,45, Title_end_bitmap, 0);
+    sprites.drawOverwrite(18,45, Title_end_bitmap, 0);    
     if (++globalCounter>0xF8){
       sprites.drawOverwrite(55,14, cligne_bitmap, 0);
+    }
+    if (difficulty&&((globalCounter>0xE0)||(globalCounter<10))){
+      sprites.drawOverwrite(81,29, win_bitmap, 0);
     }
     // Draw 
     uint8_t temp=deathToll/5;

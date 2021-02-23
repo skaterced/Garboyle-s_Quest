@@ -364,7 +364,7 @@ void drawKid()
        
         if (--kid.lives==0){
           globalCounter = 0;
-          gameState = STATE_GAME_OVER; // either we save and that increase deathToll, or we don't care
+          gameState = STATE_GAME_OVER; //  deathToll will be increased either by Continue or by Save & Quit
         }
         else { 
           deathToll++;
@@ -373,20 +373,13 @@ void drawKid()
         //gameState = (--kid.lives==0) ? STATE_GAME_OVER : STATE_GAME_NEXT_LEVEL;  //
 
       }
-      kid.actualpos = startPos;
+      kid.actualpos = startPos; //useless...
       //--kid.hearts;
     }
     
     if (kid.isFlying)
     {
       int commonx = kidcam.x - (6 * kid.direction);
-      //int commony = kidcam.y + kid.balloonOffset;
-      if (kid.hearts > 1)
-      {
-//        sprites.drawPlusMask(commonx + 1, commony - 11, balloon_plus_mask, 0);
-//        if (kid.hearts > 2) sprites.drawPlusMask(commonx + 7, commony - 12, balloon_plus_mask, 0);
-      }
-//      sprites.drawPlusMask(commonx + 4, commony - 9, balloon_plus_mask, 0);
     }
     if (!kid.isFiring)
     {
