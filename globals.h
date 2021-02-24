@@ -37,6 +37,8 @@
 #define STATE_GAME_PLAYLOAD          11
 #define STATE_GAME_PLAYNEW           12
 
+#define TILE_BG                      11
+
 #define FACING_RIGHT                 0
 #define FACING_LEFT                  1
 

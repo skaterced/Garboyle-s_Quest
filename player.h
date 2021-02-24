@@ -98,7 +98,7 @@ void setKid()
 {
   kid.pos.x = 0;
   kid.pos.y = 0;
-  kid.actualpos.x = 128;
+  kid.actualpos.x = 0;
   kid.actualpos.y = 0;
   kid.speed.x = 0;
   kid.speed.y = 0;
@@ -354,27 +354,22 @@ void drawKid()
     if ((kidcam.y > 64 + (CAMERA_OFFSET * 3))&&(globalCounter>5)) // to prevent changing level sickness ;)
     {      
       kidHurt();
+      kid.isImune = true;
+      gameState = STATE_GAME_NEXT_LEVEL;
       if (kid.hearts == 0)
       {
         // dead
-        setKid();
+        //setKid(); in stateGameNextLevel
         kid.hearts=heartsMax;
-        kid.isImune = true;
-        //kid.actualpos = startPos;
-       
+        
         if (--kid.lives==0){
           globalCounter = 0;
           gameState = STATE_GAME_OVER; //  deathToll will be increased either by Continue or by Save & Quit
         }
         else { 
-          deathToll++;
-          gameState = STATE_GAME_NEXT_LEVEL;
-        }
-        //gameState = (--kid.lives==0) ? STATE_GAME_OVER : STATE_GAME_NEXT_LEVEL;  //
-
+          deathToll++;          
+        }        
       }
-      kid.actualpos = startPos; //useless...
-      //--kid.hearts;
     }
     
     if (kid.isFlying)

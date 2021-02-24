@@ -699,7 +699,8 @@ void enemiesUpdate()
     }
     if (wizard.HP>0){
       if (0==(wizard.state&0x80)){
-        arduboy.fillCircle(wizard.pos.x - cam.pos.x +6 , wizard.pos.y - cam.pos.y +5 ,4,0);
+        //arduboy.fillCircle(wizard.pos.x - cam.pos.x +6 , wizard.pos.y - cam.pos.y +5 ,4,0);       
+        sprites.drawErase(wizard.pos.x - cam.pos.x, wizard.pos.y - cam.pos.y, WizardSprite_mask, 0);
         sprites.drawSelfMasked(wizard.pos.x - cam.pos.x, wizard.pos.y - cam.pos.y, WizardSprite, 0);
       }
       else{

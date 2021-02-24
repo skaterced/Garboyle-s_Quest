@@ -248,6 +248,7 @@ void levelLoad(const uint8_t *lvl) {
 
     rEEad = pgm_read_byte(lvl + i++);
   }
+  kid.actualpos = startPos; //seems useless but as I have an unknown bug when Kid "from from earth" and reapers not where he should
   if (wichEntrance>0){ // must start in an exit
     //startPos=levelExits[wichEntrance-1].pos;
     //kid.actualpos = startPos;
@@ -264,10 +265,10 @@ void drawGrid() {
   
   uint8_t backGround;
   if (!indorLevel){
-    backGround = 14 + (globalCounter%3);
+    backGround = TILE_BG + (globalCounter%3);
   }
   else
-    backGround = 14+ (level%3) ;
+    backGround = TILE_BG + (level%3) ;
     
   for (byte x = 8; x < 9; --x)
   {
