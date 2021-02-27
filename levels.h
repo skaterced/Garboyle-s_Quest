@@ -189,6 +189,7 @@ void levelLoad(const uint8_t *lvl) {
       case LBAT:
         {
           // Bat
+          if ((0==option)||(difficulty))
           batsCreate(vec2(x, y));
         }
         break;
