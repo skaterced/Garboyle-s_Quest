@@ -130,7 +130,7 @@ int8_t circleMove[16]={0,1,2,3,3,3,2,1,0,-1,-2,-3,-3,-3,-2,-1};
 struct Spike
 {
   HighRect pos;
-  byte characteristics;//B00000000;   //this byte holds all the enemies characteristics
+  uint8_t characteristics;//B00000000;   //this byte holds all the enemies characteristics
   //                      ||||||||
   //                      |||||||└->  0 \ these 2 bits are used to determine the spike type
   //                      ||||||└-->  1 /  
@@ -358,6 +358,12 @@ void spitterCreate (vec2 pos){
     }
 }
 
+void bonusDrop (vec2 pos){
+  if (!bossRoom&&(0==globalCounter%(6+difficulty))){
+    coinsCreate(pos >> 4);  
+  }
+}
+
 void enemiesUpdate()
 {  
   uint8_t ennemiesLeft=0;
@@ -393,11 +399,11 @@ void enemiesUpdate()
       sprites.drawOverwrite(commonx, commony, sprSpikes,  spikes[i].characteristics & B00000011);
       //sprites.drawErase(commonx, commony, sprSpikes,  spikes[i].characteristics & B00000011);
       if (!bitRead(spikes[i].characteristics, 0)) {
-        for (int l = 8; l < spikes[i].pos.height; l += 8)
+        for (uint8_t l = 8; l < spikes[i].pos.height; l += 8)
           sprites.drawOverwrite(commonx, commony + l, sprSpikes,  spikes[i].characteristics & B00000011);
       }
       else {
-        for (int l = 8; l < spikes[i].pos.width; l += 8)
+        for (uint8_t l = 8; l < spikes[i].pos.width; l += 8)
           sprites.drawOverwrite(commonx + l, commony, sprSpikes,  spikes[i].characteristics & B00000011);
       }
     }
@@ -424,7 +430,7 @@ void enemiesUpdate()
       }
 
       if (bats[i].HP>0){        
-        sprites.drawSelfMasked(bats[i].pos.x - cam.pos.x, bats[i].pos.y - cam.pos.y, BatSprite, (globalCounter&(0x04))>>2 + (bats[i].HP <= 0) * 2);
+        sprites.drawSelfMasked(bats[i].pos.x - cam.pos.x, bats[i].pos.y - cam.pos.y, BatSprite, ((globalCounter&(0x04))>>2) + (bats[i].HP <= 0) * 2);
         // Bat's eyes
         arduboy.drawPixel(bats[i].pos.x - cam.pos.x + (bats[i].direction? 4:3), bats[i].pos.y - cam.pos.y+3,0);
         arduboy.drawPixel(bats[i].pos.x - cam.pos.x + (bats[i].direction? 6:5), bats[i].pos.y - cam.pos.y+3,0);
@@ -435,6 +441,7 @@ void enemiesUpdate()
           sprites.drawSelfMasked(bats[i].pos.x - cam.pos.x, bats[i].pos.y - cam.pos.y, BatSprite, 2);
         if (bats[i].HP<-30){
           bats[i].active=false;
+          bonusDrop(bats[i].pos);
         }
       }
     }
@@ -489,6 +496,7 @@ void enemiesUpdate()
           sprites.drawSelfMasked(ghosts[i].pos.x - cam.pos.x, ghosts[i].pos.y - cam.pos.y, GhostSprite, 4);
         if (ghosts[i].HP<-30){
           ghosts[i].active=false;
+          bonusDrop(ghosts[i].pos);
         }
       }
     }
@@ -511,12 +519,12 @@ void enemiesUpdate()
   {
     ennemiesLeft++;
     //HighRect ennemiRect = {.x = sun.pos.x-8, .y = sun.pos.y-8, .width = 100, .height = 70};
-    HighRect kidPoint = {.x=kid.pos.x, .y=kid.pos.y, .width=100,.height=70}; 
+    //HighRect kidPoint = {.x=kid.pos.x, .y=kid.pos.y, .width=100,.height=70}; 
     if (/*collide(kidPoint,ennemiRect) && */ sun.HP > 0){        
       if (0==globalCounter%3){
         sun.pos.x+=circleMove[sun.direction];
         sun.pos.y+=circleMove[(sun.direction+4)%16];
-        if ((gridGetSolid(sun.pos.x-8 >> 4 ,sun.pos.y-8 >> 4))){
+        if ((gridGetSolid((sun.pos.x-8) >> 4 ,(sun.pos.y-8) >> 4))){
           sun.direction=(sun.direction+8)%16;
           sun.pos.x+=circleMove[sun.direction];
           sun.pos.y+=circleMove[(sun.direction+4)%16];
@@ -554,7 +562,7 @@ void enemiesUpdate()
     bool direction = (wizard.pos.x<kid.pos.x);
     ennemiesLeft++;
     //HighRect ennemiRect = {.x = wizard.pos.x, .y = wizard.pos.y, .width = 100, .height = 70};
-    HighRect kidPoint = {.x=kid.pos.x, .y=kid.pos.y, .width=100,.height=70}; 
+    //HighRect kidPoint = {.x=kid.pos.x, .y=kid.pos.y, .width=100,.height=70}; 
     if (/*collide(kidPoint,ennemiRect) &&*/ wizard.HP > 0){   
       //uint8_t wizRand = random(100);      
       if (--wizard.wiz_timer==0){
@@ -718,7 +726,7 @@ void enemiesUpdate()
         sprites.drawSelfMasked(wizard.pos.x - cam.pos.x, wizard.pos.y - cam.pos.y, WizardSprite, 1);
       }
       if (wizard.HP<-70){
-        wizard.active=false; // useless...
+        //wizard.active=false; // useless...
         finalBossBeaten=true;
         globalCounter=0;
         gameState=STATE_MENU_INTRO;

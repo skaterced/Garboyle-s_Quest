@@ -128,7 +128,7 @@ void checkInputs()
           kid.speed.x = kid.direction? -MAX_XSPEED:MAX_XSPEED;
         }
       }
-      if (letsJump){
+      if (letsJump&&kid.pos.y>-80){ // Y limitation for outdor lvl
         kid.isClimbing = false;
         kid.isJumping = true;
         kid.jumpTimer = PLAYER_JUMP_TIME - 4 +(jumpVelocity/10);

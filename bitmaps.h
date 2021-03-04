@@ -669,7 +669,7 @@ const uint8_t level6 [] PROGMEM = {
   0x44 , 0x0e , 0x24 , 0x17 , /*Door1*/0x27 , 
   0xa7 , 0x0d , 0x48 , 0x0b , 0x8a , (7<<5)|0x11 , 0x8a , (7<<5)|0x13 , 0x2b , 0x00 , /*Door2*/0x21 , 0x8b , (7<<5)|0x03 ,
   0x8d , (7<<5)|0x01 , 0x4e , 0x0c ,
-  0x94 , (7<<5)|0x11 , 0x95 , (7<<5)|0x02 ,
+  0x94 , (6<<5)|0x11 , 0x95 , (7<<5)|0x02 ,
   0xFF
 };
 
@@ -922,7 +922,7 @@ const uint8_t level22 [] PROGMEM = {
   B00000011, B00010000, B10000000, B00000001, B00000011,
  // Objects
   0x41 , 0x0d , 0xc1 , 0x16 , 0x42 , 0x08 , 0x82 , (5<<5)|0x1a , 0x82 , (1<<5)|0x1c , 0xc3 , 0x0a , 0x43 , 0x13 , 0x44 , 0x01 , 0x64 , 0x48 , 0x44 , 0x16 , 0x84 , /*(length<<5)|*/0x1d , 
-  0x27 , 0x00 , /*Door1*/0x2c , 0xc7 , 0x31 , 0x87 , (3<<5)|0x1a , 0x27 , 0x1f , /*Door2*/0x17 , 0xFF
+  0x27 , 0x00 , /*Door1*/0x59 , 0xc7 , 0x31 , 0x87 , (3<<5)|0x1a , 0x27 , 0x1f , /*Door2*/0x17 , 0xFF
 };
 
 const uint8_t level23 [] PROGMEM = {
@@ -964,7 +964,7 @@ const uint8_t level25 [] PROGMEM = {
   0x49 , 0x16 , 
   0xac , 0x19 , 0x2e , 0x1f , /*Door2*/0x36 , 0xFF
 };
-
+/*
 const uint8_t level26 [] PROGMEM = {
   // Tiles
   0x00, 0x00,
@@ -996,14 +996,14 @@ const uint8_t level30[] PROGMEM = {
     0x1F, //freeing some space
     0xFF
 };
-
+*/
 
 const uint8_t * levels[] = {
   level0, level1, level2, level3, level4, level5, level6, level7, level8,
   level9, level10, level11, level12, level13, level14, level15,
   level16, level17, level18, level19, level20, level21, level22,
-  level23, level24, level25, level26, level27, level28, level29,
-  level30,/* level31, jace, level32, level33, level35, level34, level36, level39, level37, levelNarrowWalls, level38,
+  level23, level24, level25, /* level26, level27, level28, level29,
+  level30, level31, jace, level32, level33, level35, level34, level36, level39, level37, levelNarrowWalls, level38,
   //level40, */
 };
 

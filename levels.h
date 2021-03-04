@@ -315,9 +315,14 @@ void kidHurt()
     kid.imuneTimer = 0;
 }
 
+bool fireBallHit (HighRect ennemiRect, uint8_t j){
+  HighRect projectileRect = {.x = kid.fireBalls[j].pos.x-firePower, .y = kid.fireBalls[j].pos.y-firePower, .width = (uint16_t)(2+2*(firePower)), .height = (uint16_t)(2+2*(firePower))};
+  return (collide(projectileRect, ennemiRect));
+}
+
 void checkCollisions()
 {
-  if ((kid.isImune)||(kid.hearts == 0))
+  if (/*(kid.isImune)||*/(kid.hearts == 0))
     return;
 
   HighRect playerRect = {.x = kid.pos.x + 2, .y = kid.pos.y + 2, .width = 8, .height = 12};
@@ -363,9 +368,10 @@ void checkCollisions()
       //if (0==globalCounter%2) ennemiRect.draw(cam.pos.x, cam.pos.y);
       for (uint8_t j=0; j<MAX_WEAPON; j++){
         if (kid.fireBalls[j].isActive){
-          HighRect projectileRect = {.x = kid.fireBalls[j].pos.x-firePower, .y = kid.fireBalls[j].pos.y-firePower, .width = 2+2*(firePower), .height = 2+2*(firePower)};
+          //HighRect projectileRect = {.x = kid.fireBalls[j].pos.x-firePower, .y = kid.fireBalls[j].pos.y-firePower, .width = 2+2*(firePower), .height = 2+2*(firePower)};
           //if (0==globalCounter%2) projectileRect.draw(cam.pos.x, cam.pos.y);
-          if (collide(projectileRect, ennemiRect))
+          //if (collide(projectileRect, ennemiRect))
+          if (fireBallHit(ennemiRect, j))
           {
             bats[i].HP-=firePower;
             kid.fireBalls[j].isActive=false;
@@ -390,8 +396,9 @@ void checkCollisions()
       HighRect ennemiRect = {.x = ghosts[i].pos.x, .y = ghosts[i].pos.y, .width = 12, .height = 16};
       for (uint8_t j=0; j<MAX_WEAPON; j++){
         if (kid.fireBalls[j].isActive){
-          HighRect projectileRect = {.x = kid.fireBalls[j].pos.x-firePower, .y = kid.fireBalls[j].pos.y-firePower, .width = 2+2*(firePower), .height = 2+2*(firePower)};
-          if (collide(projectileRect, ennemiRect))
+          //HighRect projectileRect = {.x = kid.fireBalls[j].pos.x-firePower, .y = kid.fireBalls[j].pos.y-firePower, .width = 2+2*(firePower), .height = 2+2*(firePower)};
+          //if (collide(projectileRect, ennemiRect))
+          if (fireBallHit(ennemiRect, j))
           {
             ghosts[i].HP-=firePower;
             kid.fireBalls[j].isActive=false;
@@ -412,7 +419,7 @@ void checkCollisions()
     //bullets
     if (ennemiBullets[i].isActive){
       
-      HighRect ennemiProjectileRect = {.x = ennemiBullets[i].pos.x-ennemiBullets[i].radius, .y = ennemiBullets[i].pos.y-ennemiBullets[i].radius, .width = 3+2*ennemiBullets[i].radius, .height = 3+2*ennemiBullets[i].radius};
+      HighRect ennemiProjectileRect = {.x = ennemiBullets[i].pos.x-ennemiBullets[i].radius, .y = ennemiBullets[i].pos.y-ennemiBullets[i].radius, .width = (uint16_t)( 3+2*ennemiBullets[i].radius) , .height = (uint16_t)(3+2*ennemiBullets[i].radius)};
       //if (0==globalCounter%2)            ennemiProjectileRect.draw(cam.pos.x,cam.pos.y);
       if (collide(playerRect, ennemiProjectileRect) && !kid.isImune){
         kidHurt();
@@ -432,8 +439,9 @@ void checkCollisions()
     //if (0==globalCounter%2) ennemiRect.draw(cam.pos.x, cam.pos.y);
     for (uint8_t j=0; j<MAX_WEAPON; j++){
       if (kid.fireBalls[j].isActive){
-        HighRect projectileRect = {.x = kid.fireBalls[j].pos.x-firePower, .y = kid.fireBalls[j].pos.y-firePower, .width = 2+2*(firePower), .height = 2+2*(firePower)};
-        if (collide(projectileRect, ennemiRect))
+        //HighRect projectileRect = {.x = kid.fireBalls[j].pos.x-firePower, .y = kid.fireBalls[j].pos.y-firePower, .width = 2+2*(firePower), .height = 2+2*(firePower)};
+        //if (collide(projectileRect, ennemiRect))
+        if (fireBallHit(ennemiRect, j))
         {
           sun.HP-=firePower;
           kid.fireBalls[j].isActive=false;
@@ -453,8 +461,9 @@ void checkCollisions()
     HighRect ennemiRect = {.x = wizard.pos.x, .y = wizard.pos.y, .width = 16, .height = 23};
     for (uint8_t j=0; j<MAX_WEAPON; j++){
       if (kid.fireBalls[j].isActive){
-        HighRect projectileRect = {.x = kid.fireBalls[j].pos.x-firePower, .y = kid.fireBalls[j].pos.y-firePower, .width = 2+2*(firePower), .height = 2+2*(firePower)};
-        if (collide(projectileRect, ennemiRect))
+        //HighRect projectileRect = {.x = kid.fireBalls[j].pos.x-firePower, .y = kid.fireBalls[j].pos.y-firePower, .width = 2+2*(firePower), .height = 2+2*(firePower)};
+        //if (collide(projectileRect, ennemiRect))
+        if (fireBallHit(ennemiRect, j))
         {
           wizard.HP-=firePower;
           kid.fireBalls[j].isActive=false;
@@ -475,8 +484,9 @@ void checkCollisions()
     //if (0==globalCounter%2) ennemiRect.draw(cam.pos.x, cam.pos.y);
     for (uint8_t j=0; j<MAX_WEAPON; j++){
       if (kid.fireBalls[j].isActive){
-        HighRect projectileRect = {.x = kid.fireBalls[j].pos.x-firePower, .y = kid.fireBalls[j].pos.y-firePower, .width = 2+2*(firePower), .height = 2+2*(firePower)};
-        if (collide(projectileRect, ennemiRect))
+        //HighRect projectileRect = {.x = kid.fireBalls[j].pos.x-firePower, .y = kid.fireBalls[j].pos.y-firePower, .width = 2+2*(firePower), .height = 2+2*(firePower)};
+        //if (collide(projectileRect, ennemiRect))
+        if (fireBallHit(ennemiRect, j))
         {          
           kid.fireBalls[j].isActive=false;
           if ((faceless.state&0x70)>0x20)

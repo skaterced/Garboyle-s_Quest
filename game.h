@@ -200,26 +200,28 @@ void stateGamePause()
   sprites.drawSelfMasked(47, 17, badgePause, 0);
   //bossLevels[NB_BOSS]
   stateGameOver(false);
-  if (arduboy.justPressed(B_BUTTON)){
-    if (arduboy.pressed(LEFT_BUTTON)){ //cheat
-      bossLevels[NB_BOSS-1].alive=true;
-      bossLevels[NB_BOSS-1].lvl=level;
-      bossLevels[NB_BOSS-1].reward=UPGRADE_JUMP;
-      gameState = STATE_GAME_LVLUP;
+  #ifdef CHEAT_ON
+    if (arduboy.justPressed(B_BUTTON)){
+      if (arduboy.pressed(LEFT_BUTTON)){ //cheat
+        bossLevels[NB_BOSS-1].alive=true;
+        bossLevels[NB_BOSS-1].lvl=level;
+        bossLevels[NB_BOSS-1].reward=UPGRADE_JUMP;
+        gameState = STATE_GAME_LVLUP;
+      }
+      else if (arduboy.pressed(RIGHT_BUTTON)){ //cheat
+        bossLevels[NB_BOSS-1].alive=true;
+        bossLevels[NB_BOSS-1].lvl=level;
+        bossLevels[NB_BOSS-1].reward=UPGRADE_WINGS;
+        gameState = STATE_GAME_LVLUP;
+      }
+      else if (arduboy.pressed(DOWN_BUTTON)){ //cheat
+        bossLevels[NB_BOSS-1].alive=true;
+        bossLevels[NB_BOSS-1].lvl=level;
+        bossLevels[NB_BOSS-1].reward=UPGRADE_FIRE;
+        gameState = STATE_GAME_LVLUP;
+      }
     }
-    else if (arduboy.pressed(RIGHT_BUTTON)){ //cheat
-      bossLevels[NB_BOSS-1].alive=true;
-      bossLevels[NB_BOSS-1].lvl=level;
-      bossLevels[NB_BOSS-1].reward=UPGRADE_WINGS;
-      gameState = STATE_GAME_LVLUP;
-    }
-    else if (arduboy.pressed(DOWN_BUTTON)){ //cheat
-      bossLevels[NB_BOSS-1].alive=true;
-      bossLevels[NB_BOSS-1].lvl=level;
-      bossLevels[NB_BOSS-1].reward=UPGRADE_FIRE;
-      gameState = STATE_GAME_LVLUP;
-    }
-  }  
+  #endif
   /*
   else if (arduboy.justPressed(A_BUTTON | B_BUTTON))
   {

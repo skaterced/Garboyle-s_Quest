@@ -103,6 +103,7 @@ void setKid()
   kid.speed.x = 0;
   kid.speed.y = 0;
   kid.isActive = true;
+  //kid.frame=0;
   //kid.isImune = true;
   kid.imuneTimer = 0;
   kid.jumpTimer = 0;
@@ -146,8 +147,9 @@ void checkKid()
   {
     if (arduboy.everyXFrames(8))
     {
-      kid.frame = (++kid.frame) % 4;
-      //if (kid.frame % 2 == 0)
+      //kid.frame = (++kid.frame) % 4;
+      if (++kid.frame >3)
+        kid.frame=0;
         //sound.tone(150, 20);
     }
   }
@@ -372,10 +374,6 @@ void drawKid()
       }
     }
     
-    if (kid.isFlying)
-    {
-      int commonx = kidcam.x - (6 * kid.direction);
-    }
     if (!kid.isFiring)
     {
       //sprites.drawSelfMasked(kidcam.x, kidcam.y, kidSprite, 12 + kid.direction);

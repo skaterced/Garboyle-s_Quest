@@ -7,18 +7,13 @@
 #include "vec2.h"
 #include "bitmaps.h"
 
+#define CHEAT_ON //cost 100 progmem bytes
 
 // EEPROM - change this address offset from the arduboy starting address if desired
 #define OFFSET_GQ_START              (EEPROM_STORAGE_SPACE_START + 336)
 #define OFFSET_DIFFICULTY            (OFFSET_GQ_START + sizeof(byte))
 #define OFFSET_LEVEL                 (OFFSET_DIFFICULTY + sizeof(bool))
 #define OFFSET_DEATH                 (OFFSET_LEVEL + sizeof(uint16_t))
-/*
-#define OFFSET_COINSHS               (OFFSET_COINS + sizeof(byte))
-#define OFFSET_SCORE                 (OFFSET_COINSHS + sizeof(byte))
-#define OFFSET_HSCORE                (OFFSET_SCORE + sizeof(unsigned long))
-#define OFFSET_GQ_END                (OFFSET_HSCORE + sizeof(unsigned long))
-*/
 
 //define menu states (on main menu)
 #define STATE_MENU_INTRO             0
@@ -79,7 +74,7 @@ class HighRect
     int x;
     int y;
     uint16_t width;
-    int height;
+    uint16_t height;
     void draw(int offX, int offY){
       arduboy.fillRect(x-offX,y-offY,width,height);
     }
@@ -144,10 +139,10 @@ void loadSetEEPROM()
 // It uses struct HighRect instead of the struct Rect in the library.
 bool collide(HighRect rect1, HighRect rect2)
 {
-  return !( rect2.x                 >=  rect1.x + rect1.width    ||
-            rect2.x + rect2.width   <=  rect1.x                ||
-            rect2.y                 >=  rect1.y + rect1.height ||
-            rect2.y + rect2.height  <=  rect1.y);
+  return !( rect2.x                        >=  (int)(rect1.x + rect1.width)   ||
+            rect2.x + (int)(rect2.width)   <=  rect1.x                        ||
+            rect2.y                        >=  (int)(rect1.y + rect1.height)  ||
+            rect2.y + (int)(rect2.height)  <=  rect1.y);
 }
 
 #endif
