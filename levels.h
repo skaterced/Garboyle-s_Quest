@@ -190,7 +190,7 @@ void levelLoad(const uint8_t *lvl) {
         {
           // Bat
           if ((0==option)||(difficulty))
-          batsCreate(vec2(x, y));
+            batsCreate(vec2(x, y));
         }
         break;
       case LBOSS:
@@ -234,7 +234,8 @@ void levelLoad(const uint8_t *lvl) {
       case LCOIN:
         {
           // Coins
-          coinsCreate(vec2(x, y));
+          if ((0==option)||(!difficulty))
+            coinsCreate(vec2(x, y));
         }
         break;
       default: //case LKEY:
@@ -344,17 +345,19 @@ void checkCollisions()
   }
 
     // Heart Bonus
-    if (heartBonus/*coins[i]*/.active)
-    {
-      HighRect coinrect = {.x = heartBonus.pos.x, .y = heartBonus.pos.y, .width = 10, .height = 12};
-      if (collide(playerRect, coinrect))
+    //for ( uint8_t i=0; i<2; i++){
+      if (heartBonus.active)
       {
-        if (kid.hearts<heartsMax){
-          heartBonus.active=false;
-          kid.hearts++;
+        HighRect coinrect = {.x = heartBonus.pos.x, .y = heartBonus.pos.y, .width = 10, .height = 12};
+        if (collide(playerRect, coinrect))
+        {
+          if (kid.hearts<heartsMax){
+            heartBonus.active=false;
+            kid.hearts++;
+          }
         }
       }
-    }
+    //}
 
   // Enemies and objects
   //for (byte i = 0; i < MAX_PER_TYPE; ++i)

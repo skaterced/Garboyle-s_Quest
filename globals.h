@@ -58,7 +58,7 @@
 #define UPGRADE_WINGS  0x04
 #define UPGRADE_ARMOR  0x08
 
-#define IMUNE_TIME 80
+#define IMUNE_TIME 100
 #define PLAYER_JUMP_TIME             11
 //#define PLAYER_JUMP_VELOCITY         30
 
@@ -115,9 +115,9 @@ uint8_t wingLvl=1;
 uint8_t jumpVelocity=30;
 uint8_t firePower =5;
 uint8_t heartsMax = 3; // (armor)
-
+#ifdef COUNT_DEATH
 uint8_t deathToll = 0;
-
+#endif
 void loadSetEEPROM()
 {
   if (EEPROM.read(OFFSET_GQ_START) != GAME_ID) //&& (EEPROM.read(OFFSET_GQ_END) != GAME_ID))

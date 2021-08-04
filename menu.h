@@ -31,15 +31,17 @@ void drawTitleScreen()
     if (difficulty&&((globalCounter>0xE0)||(globalCounter<10))){
       sprites.drawOverwrite(81,29, win_bitmap, 0);
     }
-    // Draw 
-    uint8_t temp=deathToll/5;
-    for (uint8_t i=0; i<temp; i++){
-      arduboy.drawLine(18+i*10, 63, 27+i*10, 58, 0);
-    }
-    for (uint8_t i=1; i<deathToll+1; i++){
-      if (i%5)
-        arduboy.drawLine(17+i*2, 58, 17+i*2, 63, 0);
-    }
+    #ifdef COUNT_DEATH
+      // Draw    
+      uint8_t temp=deathToll/5;
+      for (uint8_t i=0; i<temp; i++){
+        arduboy.drawLine(18+i*10, 63, 27+i*10, 58, 0);
+      }
+      for (uint8_t i=1; i<deathToll+1; i++){
+        if (i%5)
+          arduboy.drawLine(17+i*2, 58, 17+i*2, 63, 0);
+      }
+    #endif
   }
   
   /*
@@ -76,6 +78,7 @@ void stateMenuIntro()
   if (/*(globalCounter > 250) ||*/ arduboy.justPressed(A_BUTTON | B_BUTTON))
   {
     gameState = STATE_MENU_MAIN;
+    finalBossBeaten=false; 
     //sound.tone(425, 20);
   }
 }

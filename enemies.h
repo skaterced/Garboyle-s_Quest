@@ -141,9 +141,11 @@ Spike spikes[MAX_PER_TYPE];
 
 void enemiesInit(bool everything)
 {
-  heartBonus.pos.x = 0;
-  heartBonus.pos.y = 0;
-  heartBonus.active = false;
+  //for (uint8_t i=0; i<2; i++){
+    heartBonus.pos.x = 0;
+    heartBonus.pos.y = 0;
+    heartBonus.active = false;
+  //}
       
   for (byte i = MAX_PER_TYPE-1; i < MAX_PER_TYPE; --i)
   {
@@ -217,9 +219,9 @@ void enemiesInit(){
 
 void coinsCreate(vec2 pos)
 {
-  //for (byte i = 0; i < MAX_PER_TYPE; ++i)
+  //for (byte i = 0; i < 2; ++i)
   //for (byte i = MAX_PER_TYPE-1; i < MAX_PER_TYPE; --i)
-  {
+  //{
     if (!heartBonus.active)
     {
       //++coinsActive;
@@ -228,7 +230,7 @@ void coinsCreate(vec2 pos)
       heartBonus.active = true;
       return;
     }
-  }
+  //}
 }
 /*
 void keyCreate(vec2 pos)
@@ -508,11 +510,12 @@ void enemiesUpdate()
     }
   } // end of "for (i..."
 
-    // Coins
+  //for (uint8_t i=0; i<2; i++){
     if (heartBonus.active)
-    {
-      sprites.drawOverwrite(heartBonus.pos.x - cam.pos.x, heartBonus.pos.y - cam.pos.y, elements, 0);
-    }
+      {
+        sprites.drawOverwrite(heartBonus.pos.x - cam.pos.x, heartBonus.pos.y - cam.pos.y, elements, 0);
+      }
+    //}
 
   //Sun
   if (sun.active)
@@ -547,11 +550,15 @@ void enemiesUpdate()
     if (sun.HP>0)
       sprites.drawSelfMasked(sun.pos.x-8 - cam.pos.x, sun.pos.y-8 - cam.pos.y, SunSprite, (globalCounter&0x02)>>1);
     else{
+      //set cam on the dying sun
+      cam.pos.x=sun.pos.x-58;
+      cam.pos.y=sun.pos.y-24;
       sun.HP--;
       if (arduboy.everyXFrames(2))
         sprites.drawSelfMasked(sun.pos.x-8 - cam.pos.x, sun.pos.y-8 - cam.pos.y, SunSprite, 2);
-      if (sun.HP<-30){
+      if (sun.HP<-40){
         sun.active=false;
+        updateCamera();
       }
     }
   }
@@ -646,7 +653,7 @@ void enemiesUpdate()
       }
       else { // wiz_timer is running
         if (0!=(wizard.state&0x80)&&(wizard.wiz_timer<90)){
-          int lightningX=wizard.pos.x-cam.pos.x+5*direction;
+          int lightningX=wizard.pos.x-cam.pos.x+15*direction;
           int lightningY=wizard.pos.y-cam.pos.y+9;
           bool up = (0==globalCounter%2);
           for (uint8_t i=0; i<20; i++){
@@ -721,12 +728,13 @@ void enemiesUpdate()
     }
     else{
       wizard.HP--;
+      cam.pos.x=wizard.pos.x-58;
+      cam.pos.y=wizard.pos.y-24;
       if (arduboy.everyXFrames(2)) {
         arduboy.fillCircle(wizard.pos.x - cam.pos.x +8 , wizard.pos.y - cam.pos.y +4 ,4,0);
         sprites.drawSelfMasked(wizard.pos.x - cam.pos.x, wizard.pos.y - cam.pos.y, WizardSprite, 1);
       }
-      if (wizard.HP<-70){
-        //wizard.active=false; // useless...
+      if (wizard.HP<-70){        
         finalBossBeaten=true;
         globalCounter=0;
         gameState=STATE_MENU_INTRO;
@@ -833,6 +841,8 @@ void enemiesUpdate()
     }
     else{
       faceless.HP--;
+      cam.pos.x=faceless.pos.x-58;
+      cam.pos.y=faceless.pos.y-24;
       if (arduboy.everyXFrames(2)) {
         //arduboy.fillCircle(faceless.pos.x - cam.pos.x +8 , faceless.pos.y - cam.pos.y +4 ,4,0);
         sprites.drawSelfMasked(faceless.pos.x - cam.pos.x, faceless.pos.y - cam.pos.y, FacelessSprite, 1);
@@ -847,6 +857,7 @@ void enemiesUpdate()
   
   if (bossRoom&&(0==ennemiesLeft)){
     //LvlUp
+    globalCounter=0;
     gameState=STATE_GAME_LVLUP;
   }
 }
